@@ -5,6 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Skopje Confidential</title>
+    <!-- The base tag helps resolve relative paths in subdirectories like /skopje-confidential/ -->
+    <base href="./">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <style>
@@ -49,14 +51,16 @@
         }
     </style>
     <script type="importmap">
-    {
-      "imports": {
-        "react-dom/": "https://esm.sh/react-dom@19.0.0/",
-        "react/": "https://esm.sh/react@19.0.0/",
-        "react": "https://esm.sh/react@19.0.0"
-      }
-    }
-    </script>
+{
+  "imports": {
+    "react": "https://esm.sh/react@19.0.0",
+    "react-dom": "https://esm.sh/react-dom@19.0.0",
+    "react-dom/client": "https://esm.sh/react-dom@19.0.0/client",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "react/": "https://esm.sh/react@^19.2.3/"
+  }
+}
+</script>
 </head>
 <body class="grainy">
     <div id="loading-screen">
@@ -64,24 +68,24 @@
         <div class="text-amber-600 font-mono text-sm tracking-widest animate-pulse mb-2 uppercase">
             Decrypting Dossier...
         </div>
-        <div id="error-log" class="text-red-800 font-mono text-[10px] max-w-md text-center mt-4"></div>
+        <div id="error-log" class="text-red-800 font-mono text-[10px] max-w-md text-center mt-4 px-4"></div>
     </div>
 
     <div id="root"></div>
 
+    <!-- Diagnostic Script -->
     <script>
-        // Diagnostic tool: If the module fails to load, show why
         window.addEventListener('error', function(e) {
             const log = document.getElementById('error-log');
-            if (log) log.innerText = "System Failure: " + e.message;
+            if (log) log.innerHTML += `<div class="mb-1">SYSTEM ERROR: ${e.message}</div>`;
         });
     </script>
 
-    <!-- The ./ before index.tsx is crucial for GitHub Pages sub-directories -->
+    <!-- Standard esm.sh/run loader for local files -->
     <script type="module" src="https://esm.sh/run/./index.tsx"></script>
 
     <script type="module">
-        // Hide loading screen once React has started
+        // Hide loader once the root is populated
         const observer = new MutationObserver(() => {
             const root = document.getElementById('root');
             if (root && root.children.length > 0) {
@@ -93,7 +97,7 @@
                 observer.disconnect();
             }
         });
-        observer.observe(document.getElementById('root'), { childList: true });
+        observer.observe(document.getElementById('root'), { childList: true, subtree: true });
     </script>
 </body>
 </html>
