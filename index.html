@@ -5,10 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Skopje Confidential</title>
-    
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
-    
     <style>
         body {
             background-color: #0a0a0a;
@@ -16,29 +14,6 @@
             font-family: 'JetBrains Mono', 'Courier Prime', monospace;
             margin: 0;
             overflow-x: hidden;
-        }
-        #loading-screen {
-            position: fixed;
-            inset: 0;
-            background: #000;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
-            transition: opacity 0.5s ease;
-        }
-        .scanner-line {
-            width: 100%;
-            height: 2px;
-            background: rgba(245, 158, 11, 0.2);
-            position: absolute;
-            top: 0;
-            animation: scan 3s linear infinite;
-        }
-        @keyframes scan {
-            0% { top: 0; }
-            100% { top: 100%; }
         }
         .grainy::before {
             content: "";
@@ -50,7 +25,6 @@
             z-index: 50;
         }
     </style>
-
     <script type="importmap">
 {
   "imports": {
@@ -64,59 +38,7 @@
 </script>
 </head>
 <body class="grainy">
-    <div id="loading-screen">
-        <div class="scanner-line"></div>
-        <div class="text-amber-600 font-mono text-sm tracking-widest animate-pulse mb-2 uppercase">
-            Decrypting Dossier...
-        </div>
-        <div id="error-log" class="text-red-800 font-mono text-[10px] max-w-md text-center mt-4 px-4 space-y-1"></div>
-    </div>
-
     <div id="root"></div>
-
-    <script type="module">
-        // Use the URL constructor to get a reliable absolute path to index.tsx
-        // This handles subdirectories on GitHub Pages automatically.
-        const entryPoint = new URL('./index.tsx', window.location.href).href;
-        
-        console.log("System: Handshaking with Dossier at", entryPoint);
-
-        const script = document.createElement('script');
-        script.type = 'module';
-        script.src = `${entryPoint}`;
-        
-        script.onerror = (e) => {
-            console.error("Boot Error Details:", e);
-            document.getElementById('error-log').innerHTML = `
-                <div class="text-red-500 font-bold">CRITICAL BOOT ERROR</div>
-                <div class="mt-2">Failed to reach Dossier Engine.</div>
-                <div class="mt-2 opacity-50 break-all text-[9px] uppercase tracking-tighter">Path: ${entryPoint}</div>
-                <div class="mt-4 p-2 border border-red-900 bg-red-900/10">
-                    ACTION REQUIRED:<br/>
-                    Ensure your deploy command is:<br/>
-                    <code class="text-white">gh-pages -d .</code><br/>
-                    (Do not deploy a 'build' folder)
-                </div>
-            `;
-        };
-        
-        document.head.appendChild(script);
-    </script>
-
-    <script type="module">
-        // Loader logic: watch for the root to be populated by React
-        const observer = new MutationObserver(() => {
-            const root = document.getElementById('root');
-            if (root && root.children.length > 0) {
-                const loader = document.getElementById('loading-screen');
-                if (loader) {
-                    loader.style.opacity = '0';
-                    setTimeout(() => loader.remove(), 500);
-                }
-                observer.disconnect();
-            }
-        });
-        observer.observe(document.getElementById('root'), { childList: true, subtree: true });
-    </script>
+    <script type="module" src="index.tsx"></script>
 </body>
 </html>
