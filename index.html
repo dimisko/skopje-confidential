@@ -83,7 +83,7 @@
 
         const script = document.createElement('script');
         script.type = 'module';
-        script.src = `https://esm.sh/run/${entryPoint}`;
+        script.src = `${entryPoint}`;
         
         script.onerror = (e) => {
             console.error("Boot Error Details:", e);
