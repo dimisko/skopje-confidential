@@ -75,24 +75,28 @@
     <div id="root"></div>
 
     <script type="module">
-        // Calculate the absolute URL of index.tsx relative to this HTML file
-        // This is much safer for GitHub Pages subfolders
-        const currentUrl = window.location.href.split('?')[0].split('#')[0];
-        const baseDir = currentUrl.substring(0, currentUrl.lastIndexOf('/') + 1);
-        const entryPoint = baseDir + 'index.tsx';
+        // Use the URL constructor to get a reliable absolute path to index.tsx
+        // This handles subdirectories on GitHub Pages automatically.
+        const entryPoint = new URL('./index.tsx', window.location.href).href;
         
-        console.log("System: Resolving entry point ->", entryPoint);
+        console.log("System: Handshaking with Dossier at", entryPoint);
 
         const script = document.createElement('script');
         script.type = 'module';
         script.src = `https://esm.sh/run/${entryPoint}`;
         
-        script.onerror = () => {
+        script.onerror = (e) => {
+            console.error("Boot Error Details:", e);
             document.getElementById('error-log').innerHTML = `
                 <div class="text-red-500 font-bold">CRITICAL BOOT ERROR</div>
-                <div>Failed to load Dossier Engine from:</div>
-                <div class="break-all opacity-50">${entryPoint}</div>
-                <div class="mt-4 text-zinc-500">Ensure index.tsx is present in your repository.</div>
+                <div class="mt-2">Failed to reach Dossier Engine.</div>
+                <div class="mt-2 opacity-50 break-all text-[9px] uppercase tracking-tighter">Path: ${entryPoint}</div>
+                <div class="mt-4 p-2 border border-red-900 bg-red-900/10">
+                    ACTION REQUIRED:<br/>
+                    Ensure your deploy command is:<br/>
+                    <code class="text-white">gh-pages -d .</code><br/>
+                    (Do not deploy a 'build' folder)
+                </div>
             `;
         };
         
@@ -100,7 +104,7 @@
     </script>
 
     <script type="module">
-        // Hide loader once the root is populated
+        // Loader logic: watch for the root to be populated by React
         const observer = new MutationObserver(() => {
             const root = document.getElementById('root');
             if (root && root.children.length > 0) {
