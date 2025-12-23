@@ -5,8 +5,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Skopje Confidential</title>
-    <!-- The base tag helps resolve relative paths in subdirectories like /skopje-confidential/ -->
-    <base href="./">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <style>
@@ -73,16 +71,39 @@
 
     <div id="root"></div>
 
-    <!-- Diagnostic Script -->
-    <script>
-        window.addEventListener('error', function(e) {
-            const log = document.getElementById('error-log');
-            if (log) log.innerHTML += `<div class="mb-1">SYSTEM ERROR: ${e.message}</div>`;
+    <script type="module">
+        // Global error tracking for modules
+        window.addEventListener('error', (event) => {
+            const errorLog = document.getElementById('error-log');
+            if (errorLog) {
+                errorLog.innerHTML += `<div class="p-2 border border-red-900 mt-2 bg-red-900/10">Runtime Error: ${event.message}</div>`;
+            }
         });
-    </script>
 
-    <!-- Standard esm.sh/run loader for local files -->
-    <script type="module" src="https://esm.sh/run/./index.tsx"></script>
+        window.addEventListener('unhandledrejection', (event) => {
+            const errorLog = document.getElementById('error-log');
+            if (errorLog) {
+                errorLog.innerHTML += `<div class="p-2 border border-red-900 mt-2 bg-red-900/10">Promise Reject: ${event.reason}</div>`;
+            }
+        });
+
+        // Use standard esm.sh/run with a fallback strategy
+        async function init() {
+            try {
+                // We use the absolute path to the local index.tsx to help the esm.sh runner
+                const localPath = window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1);
+                const entryPoint = `${window.location.origin}${localPath}index.tsx`;
+                
+                const script = document.createElement('script');
+                script.type = 'module';
+                script.src = `https://esm.sh/run/${entryPoint}`;
+                document.head.appendChild(script);
+            } catch (err) {
+                document.getElementById('error-log').innerText = "Initialization failed: " + err.message;
+            }
+        }
+        init();
+    </script>
 
     <script type="module">
         // Hide loader once the root is populated
