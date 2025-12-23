@@ -6,18 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Skopje Confidential</title>
     
-    <!-- Dynamic Base Tag for GitHub Pages compatibility -->
-    <script>
-      (function() {
-        const path = window.location.pathname;
-        const base = path.endsWith('/') ? path : path.substring(0, path.lastIndexOf('/') + 1);
-        const baseTag = document.createElement('base');
-        baseTag.href = base;
-        document.head.appendChild(baseTag);
-        console.log("Dossier Base Path Set:", base);
-      })();
-    </script>
-
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     
@@ -86,18 +74,28 @@
 
     <div id="root"></div>
 
-    <!-- Error Handling & Monitoring -->
     <script type="module">
-        window.addEventListener('error', (e) => {
-            console.error("Module Load Error:", e);
-            const log = document.getElementById('error-log');
-            if (log) log.innerHTML += `<div>[ERR] ${e.message || "Script load failure"}</div>`;
-        });
+        // Calculate the absolute URL of index.tsx relative to this HTML file
+        // This is much safer for GitHub Pages subfolders
+        const currentUrl = window.location.href.split('?')[0].split('#')[0];
+        const baseDir = currentUrl.substring(0, currentUrl.lastIndexOf('/') + 1);
+        const entryPoint = baseDir + 'index.tsx';
+        
+        console.log("System: Resolving entry point ->", entryPoint);
 
-        // The ./ prefix is critical for esm.sh/run to respect the <base> tag
         const script = document.createElement('script');
         script.type = 'module';
-        script.src = 'https://esm.sh/run/./index.tsx';
+        script.src = `https://esm.sh/run/${entryPoint}`;
+        
+        script.onerror = () => {
+            document.getElementById('error-log').innerHTML = `
+                <div class="text-red-500 font-bold">CRITICAL BOOT ERROR</div>
+                <div>Failed to load Dossier Engine from:</div>
+                <div class="break-all opacity-50">${entryPoint}</div>
+                <div class="mt-4 text-zinc-500">Ensure index.tsx is present in your repository.</div>
+            `;
+        };
+        
         document.head.appendChild(script);
     </script>
 
@@ -115,17 +113,6 @@
             }
         });
         observer.observe(document.getElementById('root'), { childList: true, subtree: true });
-        
-        // Timeout if it takes too long
-        setTimeout(() => {
-            const loader = document.getElementById('loading-screen');
-            if (loader && loader.parentElement) {
-                const log = document.getElementById('error-log');
-                if (log && log.innerHTML === "") {
-                    log.innerHTML = "<div class='text-amber-700 uppercase'>Connection slow. Retrying terminal handshake...</div>";
-                }
-            }
-        }, 5000);
     </script>
 </body>
 </html>
