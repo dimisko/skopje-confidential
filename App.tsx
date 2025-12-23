@@ -1,7 +1,7 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
-import { LEVELS } from './levels';
-import { GameState, Level, NPC, DialogueNode, Clue } from './types';
+import { LEVELS } from './levels.ts';
+import { GameState, Level, NPC, DialogueNode, Clue } from './types.ts';
 
 // Helper components
 const Button: React.FC<{ 

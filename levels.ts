@@ -1,5 +1,5 @@
 
-import { Level } from './types';
+import { Level } from './types.ts';
 
 export const LEVELS: Record<number, Level> = {
   1: {
