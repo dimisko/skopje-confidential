@@ -1,155 +1,196 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import { LEVELS } from './levels.ts';
-import { GameState, Level, NPC, DialogueNode, Clue } from './types.ts';
+import { GameState, Level, NPC, DialogueNode, Clue, Location } from './types.ts';
 
-// Helper components
 const Button: React.FC<{ 
   onClick: () => void; 
   children: React.ReactNode; 
   disabled?: boolean; 
-  variant?: 'primary' | 'danger' | 'ghost' | 'success' | 'dossier';
-  type?: "button" | "submit" | "reset";
+  variant?: 'primary' | 'danger' | 'ghost' | 'success' | 'dossier' | 'paper';
   className?: string;
-}> = ({ onClick, children, disabled, variant = 'primary', type = "button", className = "" }) => {
-  const baseStyles = "px-4 py-2 font-mono text-sm transition-all duration-200 uppercase tracking-tighter";
+}> = ({ onClick, children, disabled, variant = 'primary', className = "" }) => {
+  const baseStyles = "px-4 py-2 font-mono text-xs transition-all duration-200 uppercase tracking-tighter border";
   const variants = {
-    primary: "bg-amber-900/20 text-amber-500 border border-amber-900/50 hover:bg-amber-900/40",
-    danger: "bg-red-900/20 text-red-500 border border-red-900/50 hover:bg-red-900/40",
-    success: "bg-green-900/20 text-green-500 border border-green-900/50 hover:bg-green-900/40",
-    ghost: "text-zinc-500 hover:text-zinc-300",
-    dossier: "bg-zinc-800 text-zinc-300 border border-zinc-700 hover:bg-zinc-700"
+    primary: "bg-amber-900/20 text-amber-500 border-amber-900/50 hover:bg-amber-900/40",
+    danger: "bg-red-900/20 text-red-500 border-red-900/50 hover:bg-red-900/40",
+    success: "bg-green-900/20 text-green-500 border-green-900/50 hover:bg-green-900/40",
+    ghost: "text-zinc-500 border-transparent hover:text-zinc-300 hover:border-zinc-800",
+    dossier: "bg-zinc-800 text-zinc-300 border-zinc-700 hover:bg-zinc-700",
+    paper: "bg-[#d9c5a3] text-black border-[#b09b78] hover:bg-[#c9b593]"
   };
   return (
     <button 
-      type={type}
       onClick={onClick} 
       disabled={disabled} 
-      className={`${baseStyles} ${variants[variant]} ${disabled ? 'opacity-30 cursor-not-allowed' : ''} ${className}`}
+      className={`${baseStyles} ${variants[variant]} ${disabled ? 'opacity-20 cursor-not-allowed' : ''} ${className}`}
     >
       {children}
     </button>
   );
 };
 
-const Header: React.FC<{ title: string; objective: string; migraine: number }> = ({ title, objective, migraine }) => (
-  <header className="border-b border-zinc-800 p-4 bg-zinc-900/50 backdrop-blur-sm sticky top-0 z-50">
-    <div className="flex justify-between items-start mb-2">
-      <div>
-        <h1 className="text-xl font-bold tracking-widest text-zinc-100">SKOPJE CONFIDENTIAL</h1>
-        <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-widest">Case: {title}</p>
+const DossierHeader: React.FC<{ level: Level; objective: string; migraine: number }> = ({ level, objective, migraine }) => (
+  <header className="bg-[#e6dcc5] text-zinc-900 border-b-2 border-[#b09b78] shadow-lg sticky top-0 z-[60]">
+    <div className="p-4 flex flex-col md:flex-row justify-between items-center gap-4">
+      <div className="flex-1 space-y-1">
+        <div className="flex items-center gap-2">
+          <span className="px-2 py-0.5 bg-red-800 text-white text-[9px] font-bold">TOP SECRET</span>
+          <h1 className="text-xl font-bold tracking-tighter uppercase">{level.title}</h1>
+        </div>
+        <p className="text-[10px] font-mono font-bold border-t border-black/20 pt-1 leading-tight">
+          {level.caseFile}
+        </p>
       </div>
-      <div className="text-right">
-        <p className="text-[10px] text-zinc-500 mb-1 uppercase">Partner Fatigue</p>
-        <div className="w-32 h-2 bg-zinc-800 rounded-full overflow-hidden border border-zinc-700">
-          <div 
-            className={`h-full transition-all duration-500 ${migraine > 70 ? 'bg-red-600' : 'bg-amber-600'}`} 
-            style={{ width: `${migraine}%` }}
-          />
+      
+      <div className="flex items-center gap-6 border-l border-black/10 pl-6 h-full">
+        <div className="text-right">
+          <p className="text-[8px] font-bold uppercase tracking-widest text-zinc-600 mb-1">Lead Status</p>
+          <p className="text-[11px] font-mono font-bold animate-pulse text-red-900 italic max-w-[200px] truncate">{objective}</p>
+        </div>
+        <div className="text-right hidden sm:block">
+          <p className="text-[8px] font-bold uppercase tracking-widest text-zinc-600 mb-1">VIKTOR'S MIGRAINE</p>
+          <div className="w-24 h-2 bg-black/10 border border-black/20 overflow-hidden">
+            <div 
+              className={`h-full transition-all duration-1000 ${migraine > 75 ? 'bg-red-700' : 'bg-amber-800'}`} 
+              style={{ width: `${migraine}%` }}
+            />
+          </div>
         </div>
       </div>
-    </div>
-    <div className="bg-amber-900/10 border-l-2 border-amber-600 p-2 flex items-center gap-3">
-      <span className="text-[10px] font-bold text-amber-600 uppercase animate-pulse">Active Lead:</span>
-      <span className="text-xs text-amber-500/80 font-mono italic">{objective}</span>
     </div>
   </header>
 );
 
+const IntroScreen: React.FC<{ onStart: () => void }> = ({ onStart }) => (
+  <div className="fixed inset-0 bg-black z-[100] flex flex-col items-center justify-center p-8 space-y-8 animate-in fade-in duration-1000">
+    <div className="max-w-2xl w-full border border-zinc-800 p-8 bg-zinc-900/30 space-y-6">
+      <div className="flex justify-between items-start border-b border-zinc-800 pb-4">
+        <div>
+          <h2 className="text-2xl font-bold text-zinc-100 tracking-tighter">SKOPJE CONFIDENTIAL</h2>
+          <p className="text-[10px] text-amber-600 uppercase tracking-widest">Department of Serious Crimes</p>
+        </div>
+        <span className="text-zinc-600 font-mono text-xs">LOG_01-2024</span>
+      </div>
+      
+      <div className="space-y-4 font-mono text-xs text-zinc-400 leading-relaxed">
+        <p><span className="text-zinc-100 font-bold uppercase">PROLOGUE:</span> You are a Junior Detective recently transferred from Bitola. Skopje is bigger, meaner, and smells of old cigarette ash.</p>
+        <p>You've been assigned to <span className="text-zinc-100">Chief Inspector Viktor Nikolov</span>. He's a legend who has solved more cases than the rest of the department combined, but the city's corruption has given him a permanent, debilitating migraine.</p>
+        <p><span className="text-red-600 font-bold uppercase">THE CASE:</span> Petar Stojanov, a high-profile developer, was found dead at 3:00 AM on the Stone Bridge. Struck by a heavy object and left for the Vardar to claim. No witnesses. No murder weapon.</p>
+        <p>Viktor is waiting at the precinct. Keep your head down, partner. The truth in Skopje is rarely clean.</p>
+      </div>
+
+      <div className="pt-4">
+        <Button onClick={onStart} variant="primary" className="w-full py-4 text-sm font-bold tracking-[0.2em]">INITIALIZE INVESTIGATION</Button>
+      </div>
+    </div>
+  </div>
+);
+
 const App: React.FC = () => {
-  const [gameState, setGameState] = useState<GameState>({
-    currentLevelId: 1,
-    currentLocationId: "police_station",
-    inventory: [],
-    discoveredClues: [],
-    discoveredSuspects: [],
-    witnessInteractions: {},
-    migraineLevel: 25,
-    isGameOver: false,
-    gameWon: null
+  const [showIntro, setShowIntro] = useState(true);
+  const [gameState, setGameState] = useState<GameState>(() => {
+    const initialLevel = LEVELS[1];
+    const initialUnlocked = Object.values(initialLevel.locations)
+      .filter(l => l.isInitial)
+      .map(l => l.id);
+    
+    return {
+      currentLevelId: 1,
+      currentLocationId: "police_station",
+      discoveredClues: [],
+      discoveredSuspects: [],
+      unlockedLocations: initialUnlocked,
+      witnessInteractions: {},
+      migraineLevel: 20,
+      isGameOver: false,
+      gameWon: null
+    };
   });
 
   const [activeNPC, setActiveNPC] = useState<NPC | null>(null);
   const [currentDialogue, setCurrentDialogue] = useState<DialogueNode | null>(null);
   const [isAccusing, setIsAccusing] = useState(false);
-  const [showDossier, setShowDossier] = useState(false);
   const [flavorText, setFlavorText] = useState<string | null>(null);
 
   const currentLevel = useMemo(() => LEVELS[gameState.currentLevelId], [gameState.currentLevelId]);
   const currentLocation = useMemo(() => currentLevel.locations[gameState.currentLocationId], [currentLevel, gameState.currentLocationId]);
 
-  // Dynamic Objective Tracker
-  const currentObjective = useMemo(() => {
+  useEffect(() => {
+    const newUnlocked = [...gameState.unlockedLocations];
     const clues = gameState.discoveredClues;
-    if (clues.length === 0) return "Investigate Stone Bridge crime scene.";
-    if (!clues.includes('cufflink')) return "Search for physical evidence at the Bridge.";
-    if (!clues.includes('receipt')) return "Follow the victim's trail to Debar Maalo.";
-    if (!clues.includes('shredded_docs')) return "Gain access to Stojanov Holdings executive suite.";
-    return "All major clues gathered. Return to Precinct for Arrest.";
+    
+    if (clues.includes('receipt') && !newUnlocked.includes('debar_maalo')) newUnlocked.push('debar_maalo');
+    if (clues.includes('hotel_card') && !newUnlocked.includes('hotel_arka')) newUnlocked.push('hotel_arka');
+    if (clues.includes('tire_track') && !newUnlocked.includes('vardar_galleys')) newUnlocked.push('vardar_galleys');
+    if (clues.includes('cufflink') && !newUnlocked.includes('markov_residence')) newUnlocked.push('markov_residence');
+
+    if (newUnlocked.length !== gameState.unlockedLocations.length) {
+      setGameState(prev => ({ ...prev, unlockedLocations: newUnlocked }));
+      setFlavorText("MAP UPDATED: NEW LOCATION IDENTIFIED");
+      setTimeout(() => setFlavorText(null), 3000);
+    }
   }, [gameState.discoveredClues]);
 
-  // Contextual Hint Logic
+  const currentObjective = useMemo(() => {
+    const clues = gameState.discoveredClues;
+    if (!clues.includes('receipt')) return "Sweep the Stone Bridge for traces of the killer.";
+    if (!clues.includes('hotel_card')) return "Follow the Kafana receipt lead in Debar Maalo.";
+    if (!clues.includes('cufflink')) return "Search Room 402 at Hotel Arka.";
+    if (!clues.includes('murder_weapon')) return "Recover the weapon from the Vardar near the Galleys.";
+    if (!clues.includes('missing_statuette')) return "Confirm the murder weapon source at the Markov Residence.";
+    return "EVIDENCE READY. ARREST THE KILLER.";
+  }, [gameState.discoveredClues]);
+
   const getPartnerHint = () => {
     const clues = gameState.discoveredClues;
-    const baseHint = (() => {
-      if (clues.length === 0) {
-        return "Listen, partner. We need to start where it ended. Get to the Stone Bridge and comb every inch of that pavement.";
-      }
-      if (!clues.includes('cufflink') || !clues.includes('tire_track')) {
-        return "That bridge scene still has secrets. Make sure you've searched the area thoroughly. I saw some markings near the walkway earlier.";
-      }
-      if (!clues.includes('receipt')) {
-        return "Sandra said he was missing a cufflink, but he didn't lose it in a vacuum. He was in Debar Maalo before the bridge. Head to Kafana Trend and talk to the staff.";
-      }
-      if (!clues.includes('shredded_docs')) {
-        return "That receipt points to a meeting with Markov. His office in the Business Center is cold, but that's where the paper trail usually starts. Check his desk.";
-      }
-      return "We've got the pieces, partner. A motive, a weapon, and a suspect. Head back to the station. It's time to make the arrest.";
-    })();
+    let hint = "We're spinning our wheels, partner.";
+    
+    if (gameState.currentLocationId === 'stone_bridge' && !clues.includes('receipt')) {
+      hint = "People discard things when they're in a panic. Check the trash bins or the gaps in the stone.";
+    } else if (gameState.currentLocationId === 'debar_maalo' && !clues.includes('hotel_card')) {
+      hint = "Waiters see everything. Lazo knows which pocket Stojanov kept his secrets in.";
+    } else if (gameState.currentLocationId === 'hotel_arka' && !clues.includes('cufflink')) {
+      hint = "If there was a struggle, something fell. Check the floor, under the bed. The small stuff.";
+    } else if (gameState.currentLocationId === 'vardar_galleys' && !clues.includes('murder_weapon')) {
+      hint = "Water carries things, but the branches catch them. Look where the river slows down.";
+    } else {
+      hint = "We have what we need. Let's head back to the precinct and file the warrant.";
+    }
 
-    return gameState.migraineLevel > 85 
-      ? `...ugh... ${baseHint.toLowerCase().replace(/\./g, '... ugh...')}`
-      : baseHint;
+    if (gameState.migraineLevel > 80) hint = `...ugh... ${hint.toLowerCase()} ...head's exploding...`;
+    return hint;
   };
 
-  const handleWalkman = () => {
-    const riffs = [
-      "Viktor adjusts his headphones, the opening riff of 'Hallowed Be Thy Name' drowning out the city noise.",
-      "Viktor closes his eyes as 'Back in Black' pulses through his Walkman. He seems momentarily at peace.",
-      "The heavy bass of 'Ace of Spades' leaks from Viktor's headphones. He doesn't look up.",
-      "Viktor flips the tape. 'Sweet Child O' Mine' begins. He taps his pen in rhythm with Slash's guitar."
-    ];
-    setFlavorText(riffs[Math.floor(Math.random() * riffs.length)]);
+  const handleSearch = () => {
+    const locSearches = currentLocation.searches;
+    const undiscovered = locSearches.filter(s => s.clueId && !gameState.discoveredClues.includes(s.clueId));
+    
+    if (undiscovered.length > 0) {
+      const result = undiscovered[0];
+      setGameState(prev => ({
+        ...prev,
+        discoveredClues: [...prev.discoveredClues, result.clueId!],
+        migraineLevel: Math.min(100, prev.migraineLevel + 4)
+      }));
+      setFlavorText(result.description);
+    } else {
+      setFlavorText("Area sweep complete. No new evidence found.");
+    }
     setTimeout(() => setFlavorText(null), 4000);
-  };
-
-  const moveLocation = (id: string) => {
-    setGameState(prev => ({ 
-      ...prev, 
-      currentLocationId: id,
-      migraineLevel: Math.min(100, prev.migraineLevel + 3)
-    }));
   };
 
   const startDialogue = (npcId: string) => {
     const npc = currentLevel.npcs[npcId];
     setActiveNPC(npc);
-    
-    // Discover the suspect if not already known
     if (!gameState.discoveredSuspects.includes(npcId)) {
-      setGameState(prev => ({
-        ...prev,
-        discoveredSuspects: [...prev.discoveredSuspects, npcId]
-      }));
+      setGameState(prev => ({ ...prev, discoveredSuspects: [...prev.discoveredSuspects, npcId] }));
     }
-
-    // ALWAYS start at the initial node
     setCurrentDialogue(npc.dialogue[npc.initialNode]);
   };
 
   const handleDialogueOption = (nextId: string) => {
     if (!activeNPC) return;
-    
     if (!nextId || !activeNPC.dialogue[nextId]) {
       setActiveNPC(null);
       setCurrentDialogue(null);
@@ -157,45 +198,12 @@ const App: React.FC = () => {
     }
 
     let nextNode = activeNPC.dialogue[nextId];
-    if (nextId === 'v_hint') {
+    if (nextId === 'v_help') {
       nextNode = { ...nextNode, text: getPartnerHint() };
+      setGameState(prev => ({ ...prev, migraineLevel: Math.min(100, prev.migraineLevel + 8) }));
     }
 
     setCurrentDialogue(nextNode);
-    setGameState(prev => ({
-      ...prev,
-      witnessInteractions: { ...prev.witnessInteractions, [activeNPC.id]: nextId }
-    }));
-  };
-
-  const searchLocation = (searchId: string) => {
-    const search = currentLocation.searches.find(s => s.id === searchId);
-    if (!search) return;
-
-    if (search.requiresClueId && !gameState.discoveredClues.includes(search.requiresClueId)) {
-      setFlavorText("You're missing something crucial. Maybe a previous lead leads here?");
-      setTimeout(() => setFlavorText(null), 3000);
-      return;
-    }
-
-    // SPECIAL CASE: Painkillers in Viktor's desk
-    if (searchId === 's1') {
-      setGameState(prev => ({
-        ...prev,
-        migraineLevel: Math.max(0, prev.migraineLevel - 50)
-      }));
-      setFlavorText("You find Viktor's painkillers. You hand him two pills with a glass of lukewarm water. His grip on his temples loosens slightly.");
-    } else {
-      setFlavorText(search.description);
-    }
-
-    if (search.clueId && !gameState.discoveredClues.includes(search.clueId)) {
-      setGameState(prev => ({
-        ...prev,
-        discoveredClues: [...prev.discoveredClues, search.clueId!]
-      }));
-    }
-    setTimeout(() => setFlavorText(null), 5000);
   };
 
   const handleAccusation = (killerId: string, motive: string, evidenceId: string) => {
@@ -204,224 +212,154 @@ const App: React.FC = () => {
       motive === currentLevel.solution.motive && 
       evidenceId === currentLevel.solution.evidenceId;
 
-    setGameState(prev => ({
-      ...prev,
-      isGameOver: true,
-      gameWon: isCorrect
-    }));
+    setGameState(prev => ({ ...prev, isGameOver: true, gameWon: isCorrect }));
     setIsAccusing(false);
   };
 
-  const restartGame = () => {
-    setGameState({
-      currentLevelId: 1,
-      currentLocationId: "police_station",
-      inventory: [],
-      discoveredClues: [],
-      discoveredSuspects: [],
-      witnessInteractions: {},
-      migraineLevel: 25,
-      isGameOver: false,
-      gameWon: null
-    });
-    setActiveNPC(null);
-    setCurrentDialogue(null);
-    setIsAccusing(false);
-  };
+  if (showIntro) return <IntroScreen onStart={() => setShowIntro(false)} />;
 
   if (gameState.isGameOver) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center p-6 font-mono">
-        <div className="max-w-xl w-full border-2 border-zinc-800 p-8 text-center space-y-6 bg-zinc-900/30 shadow-[0_0_50px_rgba(0,0,0,1)] animate-in zoom-in duration-500">
-          <h2 className={`text-4xl font-bold tracking-tighter ${gameState.gameWon ? 'text-green-500' : 'text-red-500'}`}>
+      <div className="min-h-screen bg-black flex items-center justify-center p-6 font-mono text-zinc-100 grainy">
+        <div className="max-w-xl w-full border-2 border-zinc-800 p-8 text-center space-y-6 bg-zinc-900/40 shadow-[0_0_50px_rgba(0,0,0,1)]">
+          <h2 className={`text-5xl font-bold tracking-tighter ${gameState.gameWon ? 'text-green-500' : 'text-red-500'}`}>
             {gameState.gameWon ? "CASE CLOSED" : "CASE COLD"}
           </h2>
-          <div className="h-px bg-zinc-800 w-full"></div>
+          <div className="h-0.5 bg-zinc-800 w-full" />
           <p className="text-zinc-400 text-sm leading-relaxed">
             {gameState.gameWon 
-              ? `You successfully cornered ${currentLevel.npcs[currentLevel.solution.killerId].name}. Viktor looks at you, a rare, pained smile crossing his face. 'Not bad, partner. Maybe my head will stop throbbing for five minutes.'`
-              : "The investigation fell apart. The real killer vanished into the shadows of Skopje, and Viktor's migraine reached a breaking point. He's been put on medical leave, and the file is buried."}
+              ? `Marija Markova was arrested at her estate. The brass statuette was confirmed as the murder weapon. Viktor looks at the city lights and, for the first time, he doesn't wince. 'Nice work, partner. Let's grab a coffee. On me.'`
+              : "The warrant was rejected for lack of evidence. The Markovs have already left for their villa in Greece. Viktor handed in his badge this morning. Skopje remains silent."}
           </p>
-          <div className="pt-4">
-            <Button onClick={restartGame} variant="primary">RE-OPEN DOSSIER</Button>
-          </div>
+          <Button onClick={() => window.location.reload()} variant="primary">REOPEN DOSSIER</Button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen max-w-4xl mx-auto flex flex-col border-x border-zinc-800 bg-[#0c0c0c] shadow-2xl relative">
-      <Header title={currentLevel.title} objective={currentObjective} migraine={gameState.migraineLevel} />
+    <div className="min-h-screen max-w-4xl mx-auto flex flex-col border-x border-zinc-800 bg-[#0a0a0a] shadow-2xl relative grainy">
+      <DossierHeader level={currentLevel} objective={currentObjective} migraine={gameState.migraineLevel} />
 
       <main className="flex-1 overflow-y-auto p-4 md:p-8 space-y-8 pb-32">
         {flavorText && (
-          <div className="fixed bottom-24 left-1/2 -translate-x-1/2 w-[90%] md:w-auto bg-amber-900/90 text-amber-100 p-3 border border-amber-500 font-mono text-xs z-50 animate-pulse text-center">
+          <div className="fixed top-24 left-1/2 -translate-x-1/2 w-[90%] md:w-auto bg-amber-950 text-amber-500 p-3 border border-amber-600 font-mono text-xs z-[60] animate-pulse text-center shadow-xl uppercase">
             {flavorText}
           </div>
         )}
 
-        {/* Dossier Toggle View */}
-        <section className="border-2 border-zinc-800 bg-zinc-900/30 p-4 relative overflow-hidden">
-          <div className="absolute top-2 right-2 opacity-10 rotate-12 text-4xl font-bold text-red-600 pointer-events-none">CONFIDENTIAL</div>
-          <div className="flex justify-between items-center mb-2">
-            <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-widest">Case Briefing #01-Vardar</h3>
-            <Button variant="ghost" onClick={() => setShowDossier(!showDossier)}>
-              {showDossier ? "Hide Details" : "Show Details"}
-            </Button>
-          </div>
-          {showDossier && (
-            <div className="space-y-3 border-t border-zinc-800 pt-3 animate-in fade-in slide-in-from-top-2 duration-300">
-              <div className="grid grid-cols-2 gap-4 text-[10px] md:text-xs">
-                <div>
-                  <p className="text-zinc-600 uppercase font-bold">Victim</p>
-                  <p className="text-zinc-300">Petar Stojanov, 54</p>
-                </div>
-                <div>
-                  <p className="text-zinc-600 uppercase font-bold">Location</p>
-                  <p className="text-zinc-300">Stone Bridge, Centar</p>
-                </div>
-                <div>
-                  <p className="text-zinc-600 uppercase font-bold">Est. TOD</p>
-                  <p className="text-zinc-300">01:00 AM - 02:00 AM</p>
-                </div>
-                <div>
-                  <p className="text-zinc-600 uppercase font-bold">Cause</p>
-                  <p className="text-zinc-300">Blunt Force Trauma</p>
-                </div>
-              </div>
-              <p className="text-[10px] text-zinc-400 italic border-l border-zinc-700 pl-2">
-                "Stojanov was a major property developer. Found by a night watchman. No witnesses reported at the scene."
-              </p>
-            </div>
-          )}
-        </section>
-
         {activeNPC && currentDialogue ? (
-          <div className="border-2 border-amber-900/30 bg-zinc-900/40 p-6 space-y-4 animate-in fade-in duration-300">
-            <div className="flex justify-between items-start">
-              <div>
-                <p className="text-[10px] text-amber-500 uppercase tracking-widest mb-1">{activeNPC.role}</p>
-                <h3 className="text-xl font-bold text-zinc-100">{activeNPC.name}</h3>
-              </div>
+          <div className="border border-amber-900/30 bg-zinc-900/50 p-6 space-y-6 animate-in fade-in slide-in-from-top-4 duration-300">
+            <div>
+              <p className="text-[10px] text-amber-500 uppercase tracking-[0.3em] mb-1">{activeNPC.role}</p>
+              <h3 className="text-2xl font-bold text-zinc-100">{activeNPC.name}</h3>
             </div>
             <div className="py-4 border-y border-zinc-800">
-              <p className="text-zinc-300 italic">
-                {gameState.migraineLevel > 85 && activeNPC.id === 'viktor' 
-                  ? currentDialogue.text.replace(/[\.!?]/g, '... ugh...') 
-                  : currentDialogue.text}
-              </p>
+              <p className="text-zinc-300 italic leading-relaxed font-serif text-lg">"{currentDialogue.text}"</p>
             </div>
-            <div className="flex flex-col gap-2">
-              {currentDialogue.options.length > 0 ? (
-                currentDialogue.options.map((opt, i) => {
-                  const hasReq = !opt.requirement || (opt.requirement.clueId && gameState.discoveredClues.includes(opt.requirement.clueId));
-                  return (
-                    <Button 
-                      key={i} 
-                      disabled={!hasReq}
-                      onClick={() => handleDialogueOption(opt.nextId)}
-                    >
-                      {opt.text} {!hasReq && " (Need Evidence)"}
-                    </Button>
-                  );
-                })
-              ) : (
-                <Button variant="success" onClick={() => { setActiveNPC(null); setCurrentDialogue(null); }}>END CONVERSATION</Button>
-              )}
-              {currentDialogue.options.length > 0 && (
-                <Button variant="ghost" onClick={() => { setActiveNPC(null); setCurrentDialogue(null); }}>LEAVE CONVERSATION</Button>
+            <div className="grid grid-cols-1 gap-2">
+              {currentDialogue.options.map((opt, i) => {
+                const hasReq = !opt.requirement || (opt.requirement.clueId && gameState.discoveredClues.includes(opt.requirement.clueId));
+                return (
+                  <Button 
+                    key={i} 
+                    disabled={!hasReq}
+                    onClick={() => handleDialogueOption(opt.nextId)}
+                  >
+                    {opt.text} {!hasReq && " (Evidence Required)"}
+                  </Button>
+                );
+              })}
+              {currentDialogue.options.length === 0 && (
+                <Button variant="success" onClick={() => { setActiveNPC(null); setCurrentDialogue(null); }}>LEAVE CONVERSATION</Button>
               )}
             </div>
           </div>
         ) : (
-          <div className="space-y-6 animate-in slide-in-from-bottom-4 duration-300">
-            <section>
-              <h2 className="text-2xl font-bold text-zinc-100 flex items-center gap-2">
-                <span className="w-2 h-6 bg-amber-600 block"></span>
-                {currentLocation.name}
-              </h2>
-              <p className="mt-4 text-zinc-400 leading-relaxed text-sm md:text-base border-l border-zinc-800 pl-4 py-2">
+          <div className="space-y-8">
+            <section className="space-y-4">
+              <div className="flex items-center gap-3">
+                <span className="w-1.5 h-8 bg-amber-600" />
+                <h2 className="text-3xl font-bold text-zinc-100 tracking-tight uppercase">{currentLocation.name}</h2>
+              </div>
+              <p className="text-zinc-400 leading-relaxed text-sm md:text-base italic border-l border-zinc-800 pl-6">
                 {currentLocation.description}
               </p>
             </section>
 
-            <section className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-3">
-                <h4 className="text-[10px] text-zinc-500 uppercase tracking-widest font-bold border-b border-zinc-800 pb-1">Field Actions</h4>
-                <div className="flex flex-wrap gap-2">
-                  {currentLocation.searches.map(s => (
-                    <Button key={s.id} onClick={() => searchLocation(s.id)}>
-                      {s.id === 's1' ? "Check Desk (Manage Fatigue)" : "Search Area"}
-                    </Button>
-                  ))}
-                  {currentLocation.npcs.map(nId => (
-                    <Button key={nId} onClick={() => startDialogue(nId)} variant="primary">
-                      Talk to {currentLevel.npcs[nId].name}
-                    </Button>
-                  ))}
-                </div>
-              </div>
+            <section className="flex flex-wrap gap-3">
+              <Button onClick={handleSearch} variant="primary" className="flex-1 py-4 text-sm font-bold border-2">
+                <span className="flex items-center justify-center gap-2">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                  SEARCH AREA
+                </span>
+              </Button>
+              {currentLocation.npcs.map(nId => (
+                <Button key={nId} onClick={() => startDialogue(nId)} variant="dossier" className="flex-1 py-4 text-sm font-bold border-2">
+                  TALK TO {currentLevel.npcs[nId].name}
+                </Button>
+              ))}
+            </section>
 
-              <div className="space-y-3">
-                <h4 className="text-[10px] text-zinc-500 uppercase tracking-widest font-bold border-b border-zinc-800 pb-1">Move to Quarter</h4>
-                <div className="flex flex-wrap gap-2">
-                  {currentLocation.connections.map(cId => (
-                    <Button key={cId} variant="ghost" onClick={() => moveLocation(cId)}>
-                      {currentLevel.locations[cId].name}
-                    </Button>
-                  ))}
-                </div>
+            <section className="space-y-4 border-t border-zinc-900 pt-6">
+              <h4 className="text-[10px] text-zinc-600 uppercase tracking-[0.2em] font-bold">Investigate Locations</h4>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                {gameState.unlockedLocations.map(locId => (
+                  <Button 
+                    key={locId} 
+                    variant={gameState.currentLocationId === locId ? 'success' : 'ghost'}
+                    className="text-[9px] py-3"
+                    onClick={() => setGameState(prev => ({ ...prev, currentLocationId: locId, migraineLevel: Math.min(100, prev.migraineLevel + 1) }))}
+                  >
+                    {currentLevel.locations[locId].name}
+                  </Button>
+                ))}
+              </div>
+            </section>
+
+            <section className="border-t border-zinc-900 pt-8">
+              <h4 className="text-[10px] text-zinc-600 uppercase tracking-[0.2em] font-bold mb-4">Evidence & Findings</h4>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {gameState.discoveredClues.map(cId => {
+                  const clue = currentLevel.clues[cId];
+                  return (
+                    <div key={cId} className="p-3 border border-zinc-800 bg-zinc-900/30 rounded-sm flex items-start gap-3">
+                      <div className="mt-1 w-2 h-2 rounded-full bg-amber-600 shrink-0 shadow-[0_0_5px_rgba(217,119,6,0.5)]" />
+                      <div>
+                        <h5 className="text-[11px] font-bold text-amber-500 uppercase mb-1">{clue.name}</h5>
+                        <p className="text-[10px] text-zinc-500 leading-tight italic">"{clue.description}"</p>
+                      </div>
+                    </div>
+                  );
+                })}
+                {gameState.discoveredClues.length === 0 && (
+                  <div className="col-span-2 text-center py-8 border border-dashed border-zinc-800 opacity-20 text-[10px] uppercase tracking-widest">No Evidence Recovered</div>
+                )}
               </div>
             </section>
           </div>
         )}
-
-        <section className="border-t border-zinc-800 pt-8 mt-8">
-          <div className="flex justify-between items-center mb-4">
-            <h4 className="text-[10px] text-zinc-500 uppercase tracking-widest font-bold">Evidence Locker</h4>
-            <span className="text-[10px] text-zinc-600 font-mono">COUNT: {gameState.discoveredClues.length}</span>
-          </div>
-          {gameState.discoveredClues.length === 0 ? (
-            <div className="p-8 border border-zinc-900 bg-zinc-900/10 flex items-center justify-center grayscale opacity-50">
-               <p className="text-[10px] text-zinc-700 italic uppercase">Evidence Locker Empty</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {gameState.discoveredClues.map(cId => {
-                const clue = currentLevel.clues[cId];
-                return (
-                  <div key={cId} className="p-3 border border-zinc-700 bg-zinc-800/20 rounded shadow-inner hover:border-amber-600/50 transition-colors">
-                    <h5 className="text-xs font-bold text-amber-500 uppercase mb-1">{clue.name}</h5>
-                    <p className="text-[10px] text-zinc-400 leading-tight italic">"{clue.description}"</p>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </section>
       </main>
 
-      <footer className="p-4 border-t border-zinc-800 bg-zinc-900/80 backdrop-blur sticky bottom-0 z-50 flex justify-between items-center gap-4">
-        <Button onClick={handleWalkman} variant="ghost">
-          <span className="flex items-center gap-2">
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path></svg>
-            WALKMAN
-          </span>
-        </Button>
+      <footer className="p-4 border-t border-zinc-800 bg-zinc-900/90 backdrop-blur-md sticky bottom-0 z-50 flex justify-between items-center">
+        <div className="flex gap-4">
+          <Button variant="ghost" className="text-[9px]" onClick={() => window.alert("Walkman: Viktor's cassette tape is playing 'Bijelo Dugme'. It helps him think through the pain.")}>PLAY WALKMAN</Button>
+        </div>
         
         {gameState.currentLocationId === 'police_station' && !activeNPC && (
-          <Button variant="danger" onClick={() => setIsAccusing(true)}>
-            MAKE ARREST
+          <Button variant="danger" className="px-8 font-bold border-2 animate-pulse" onClick={() => setIsAccusing(true)}>
+            FILE ARREST WARRANT
           </Button>
         )}
       </footer>
 
       {isAccusing && (
-        <div className="fixed inset-0 bg-black/95 z-[100] flex items-center justify-center p-4">
-          <div className="max-w-2xl w-full border-2 border-red-900/50 bg-[#0a0a0a] p-8 space-y-6 overflow-y-auto max-h-[90vh] animate-in slide-in-from-bottom-8 duration-300 shadow-[0_0_100px_rgba(153,27,27,0.3)]">
-            <h2 className="text-2xl font-bold text-red-500 uppercase tracking-tighter text-center underline decoration-red-900 underline-offset-8">Final Indictment</h2>
-            <p className="text-xs text-zinc-500 text-center uppercase font-mono">Select the culprit and motive based on the evidence gathered.</p>
+        <div className="fixed inset-0 bg-black/98 z-[100] flex items-center justify-center p-4 backdrop-blur-md">
+          <div className="max-w-xl w-full border-2 border-red-900/50 bg-[#050505] p-8 space-y-8 animate-in zoom-in-95 duration-300 shadow-2xl">
+            <div className="text-center space-y-2">
+              <h2 className="text-3xl font-bold text-red-600 uppercase tracking-tighter">FINAL ARREST DOSSIER</h2>
+              <p className="text-[10px] text-zinc-500 uppercase font-mono tracking-widest">Identify the suspect, motive, and smoking gun.</p>
+            </div>
             
             <AccusationForm 
               level={currentLevel} 
@@ -437,73 +375,56 @@ const App: React.FC = () => {
   );
 };
 
-interface AccusationFormProps {
+const AccusationForm: React.FC<{
   level: Level;
   onClose: () => void;
   onAccuse: (killer: string, motive: string, evidence: string) => void;
   clues: string[];
   discoveredSuspects: string[];
-}
-
-const AccusationForm: React.FC<AccusationFormProps> = ({ level, onClose, onAccuse, clues, discoveredSuspects }) => {
+}> = ({ level, onClose, onAccuse, clues, discoveredSuspects }) => {
   const [killer, setKiller] = useState("");
   const [motive, setMotive] = useState("");
   const [evidence, setEvidence] = useState("");
 
-  const motives = [
-    "Crimes of Passion",
-    "Business Rivalry",
-    "Embezzlement & Cover-up",
-    "Accidental Death",
-    "Personal Vendetta"
-  ];
+  const motives = ["Personal Vendetta", "Business Rivalry", "Crimes of Passion", "Accidental Death"];
 
   return (
-    <div className="space-y-8 font-mono">
+    <div className="space-y-6 font-mono">
       <div className="space-y-2">
-        <label className="text-[10px] text-zinc-500 uppercase font-bold">Primary Suspect (Discovered only)</label>
-        <select value={killer} onChange={e => setKiller(e.target.value)} className="w-full bg-zinc-900 border border-zinc-800 text-zinc-100 p-3 text-sm uppercase outline-none focus:border-red-600 transition-colors cursor-pointer">
-          <option value="">Select Suspect...</option>
-          {(Object.values(level.npcs) as NPC[])
-            .filter(n => n.id !== 'viktor' && n.id !== 'sandra' && discoveredSuspects.includes(n.id))
-            .map(n => (
-            <option key={n.id} value={n.id}>{n.name} ({n.role})</option>
-          ))}
-        </select>
-        {discoveredSuspects.filter(id => id !== 'viktor' && id !== 'sandra').length === 0 && (
-          <p className="text-[9px] text-red-400 italic">No suspects encountered in the field yet.</p>
-        )}
-      </div>
-
-      <div className="space-y-2">
-        <label className="text-[10px] text-zinc-500 uppercase font-bold">Motive</label>
-        <select value={motive} onChange={e => setMotive(e.target.value)} className="w-full bg-zinc-900 border border-zinc-800 text-zinc-100 p-3 text-sm uppercase outline-none focus:border-red-600 transition-colors cursor-pointer">
-          <option value="">Select Motive...</option>
-          {motives.map(m => (
-            <option key={m} value={m}>{m}</option>
+        <label className="text-[10px] text-zinc-500 uppercase font-bold">SUSPECT_ID</label>
+        <select value={killer} onChange={e => setKiller(e.target.value)} className="w-full bg-zinc-900 border border-zinc-800 text-zinc-100 p-3 text-xs uppercase outline-none focus:border-red-600 appearance-none">
+          <option value="">-- SELECT SUSPECT --</option>
+          {discoveredSuspects.filter(id => id !== 'viktor' && id !== 'sandra' && id !== 'waiter').map(id => (
+            <option key={id} value={id}>{level.npcs[id].name}</option>
           ))}
         </select>
       </div>
 
       <div className="space-y-2">
-        <label className="text-[10px] text-zinc-500 uppercase font-bold">Key Evidence</label>
-        <select value={evidence} onChange={e => setEvidence(e.target.value)} className="w-full bg-zinc-900 border border-zinc-800 text-zinc-100 p-3 text-sm uppercase outline-none focus:border-red-600 transition-colors cursor-pointer">
-          <option value="">Select Evidence...</option>
-          {clues.map(cId => (
-            <option key={cId} value={cId}>{level.clues[cId].name}</option>
-          ))}
+        <label className="text-[10px] text-zinc-500 uppercase font-bold">ESTABLISHED MOTIVE</label>
+        <select value={motive} onChange={e => setMotive(e.target.value)} className="w-full bg-zinc-900 border border-zinc-800 text-zinc-100 p-3 text-xs uppercase outline-none focus:border-red-600 appearance-none">
+          <option value="">-- SELECT MOTIVE --</option>
+          {motives.map(m => <option key={m} value={m}>{m}</option>)}
+        </select>
+      </div>
+
+      <div className="space-y-2">
+        <label className="text-[10px] text-zinc-500 uppercase font-bold">EXHIBIT A (WEAPON)</label>
+        <select value={evidence} onChange={e => setEvidence(e.target.value)} className="w-full bg-zinc-900 border border-zinc-800 text-zinc-100 p-3 text-xs uppercase outline-none focus:border-red-600 appearance-none">
+          <option value="">-- SELECT EVIDENCE --</option>
+          {clues.map(cId => <option key={cId} value={cId}>{level.clues[cId].name}</option>)}
         </select>
       </div>
 
       <div className="flex gap-4 pt-4">
-        <Button variant="ghost" onClick={onClose} className="flex-1">CANCEL</Button>
+        <Button variant="ghost" onClick={onClose} className="flex-1">STAY INVESTIGATION</Button>
         <Button 
           variant="danger" 
           className="flex-1" 
           disabled={!killer || !motive || !evidence}
           onClick={() => onAccuse(killer, motive, evidence)}
         >
-          EXECUTE ARREST WARRANT
+          EXECUTE WARRANT
         </Button>
       </div>
     </div>

@@ -1,5 +1,5 @@
 
-export const GAME_VERSION = "1.0.1";
+export const GAME_VERSION = "1.0.2";
 
 export interface DialogueOption {
   text: string;
@@ -45,9 +45,9 @@ export interface Location {
   id: string;
   name: string;
   description: string;
-  npcs: string[]; // NPC IDs
+  npcs: string[]; 
   searches: SearchResult[];
-  connections: string[]; // Location IDs
+  isInitial?: boolean;
 }
 
 export interface Level {
@@ -67,11 +67,11 @@ export interface Level {
 export interface GameState {
   currentLevelId: number;
   currentLocationId: string;
-  inventory: string[]; // Clue IDs
   discoveredClues: string[];
-  discoveredSuspects: string[]; // NPC IDs
-  witnessInteractions: Record<string, string>; // npcId: lastNodeId
-  migraineLevel: number; // 0-100
+  discoveredSuspects: string[]; 
+  unlockedLocations: string[];
+  witnessInteractions: Record<string, string>;
+  migraineLevel: number; 
   isGameOver: boolean;
   gameWon: boolean | null;
 }

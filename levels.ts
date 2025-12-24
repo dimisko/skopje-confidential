@@ -4,288 +4,223 @@ import { Level } from './types.ts';
 export const LEVELS: Record<number, Level> = {
   1: {
     id: 1,
-    title: "The Vardar Bridge Case",
-    caseFile: "VICTIM: Petar Stojanov, 54. FOUND: Under Stone Bridge, 03:00 AM. CAUSE: Blunt force trauma. Stojanov was a major developer in Centar. High profile.",
+    title: "Water Under the Bridge",
+    caseFile: "VICTIM: Petar Stojanov (44). FOUND: Stone Bridge @ 03:00. CAUSE: Blunt Force Trauma. NOTES: Victim was a top city developer. No wallet found. Signs of struggle.",
     locations: {
       "police_station": {
         id: "police_station",
         name: "Skopje Central Police Dept",
-        description: "The air in the Taftalidze precinct is thick with cigarette smoke and bad coffee. Viktor's desk is a mess of files and half-empty aspirin packets. The radio hums with chatter about the Stojanov murder.",
+        description: "The precinct smells of damp concrete and cheap tobacco. Viktor sits at his desk, head in hands. This is the only place in Skopje where the truth feels like a burden rather than a secret.",
         npcs: ["viktor", "sandra"],
         searches: [
-          { id: "s1", description: "You check Viktor's drawer. It's full of 80s rock cassette tapes and a bottle of high-strength painkillers." }
+          { id: "s1", description: "Viktor's desk contains an emergency stash of potent painkillers. You give him two. His breathing slows down.", clueId: "migraine_relief" }
         ],
-        connections: ["stone_bridge", "debar_maalo"]
+        isInitial: true
       },
       "stone_bridge": {
         id: "stone_bridge",
         name: "Stone Bridge (Crime Scene)",
-        description: "The Vardar flows sluggishly below. Yellow tape flutters in the wind. The chalk outline of Petar Stojanov is still visible on the damp pavement where he was found at 3 AM.",
+        description: "Police tape flutters in the wind. The Vardar river rages below. The spot where Stojanov fell is marked with a dark stain. The city's center feels cold tonight.",
         npcs: [],
         searches: [
-          { id: "s2", description: "You search the surrounding bushes and find a luxury cufflinks with an 'S' engraving.", clueId: "cufflink" },
-          { id: "s3", description: "You notice a tire track near the walkway that doesn't match the police vehicles. Someone drove right up to the pedestrian zone.", clueId: "tire_track" }
+          { id: "s2", description: "You notice tire tracks near the pedestrian zone. Heavy treads, likely a high-end SUV. No police vehicles were here yet.", clueId: "tire_track" },
+          { id: "s3", description: "Discarded near a trash bin is a damp receipt from 'Kafana Trend' in Debar Maalo, dated last night.", clueId: "receipt" }
         ],
-        connections: ["police_station", "business_center"]
+        isInitial: true
       },
       "debar_maalo": {
         id: "debar_maalo",
-        name: "Debar Maalo - Bohemian Quarter",
-        description: "The narrow streets are filled with the scent of grilled meat. This is where Stojanov spent his last evening. Witnesses say he was here until midnight.",
+        name: "Debar Maalo - Kafana Trend",
+        description: "The bohemian quarter is quiet now. 'Trend' is empty, but the scent of grilled meat lingers. This is where Stojanov spent his final hours.",
         npcs: ["waiter"],
         searches: [
-          { id: "s4", description: "Inside 'Kafana Trend', you find a discarded receipt for three people. One of the names on the reservation was 'Markov'.", clueId: "receipt" }
-        ],
-        connections: ["police_station"]
+          { id: "s4", description: "Behind a stack of menus, you find a booking card for 'Hotel Arka', Room 402, booked under the name 'Elena P.'", clueId: "hotel_card" }
+        ]
       },
-      "business_center": {
-        id: "business_center",
-        name: "Stojanov Holdings",
-        description: "A cold, glass tower that looms over the city. This was the victim's empire. The lobby is eerily quiet now that the boss is gone.",
-        npcs: ["secretary", "markov"],
+      "hotel_arka": {
+        id: "hotel_arka",
+        name: "Hotel Arka - Room 402",
+        description: "A luxury boutique hotel in the Old Bazaar. Room 402 is clean, but there's a lingering scent of expensive perfume. Stojanov clearly used this for 'private' matters.",
+        npcs: [],
         searches: [
-          { id: "s5", description: "Behind the heavy oak desk in the executive suite, you find a shredder full of documents about a failed deal in Taftalidze.", clueId: "shredded_docs", requiresClueId: "receipt" }
-        ],
-        connections: ["stone_bridge"]
+          { id: "s5", description: "Under the bedside table, you find a gold cufflink with an 'S' engraving. It matches the one missing from the victim's body.", clueId: "cufflink" },
+          { id: "s6", description: "Hidden in the room's safe (which was left open), you find documents showing Stojanov was blackmailing Marija Markova for files on her husband's embezzlement.", clueId: "blackmail_docs" }
+        ]
+      },
+      "vardar_galleys": {
+        id: "vardar_galleys",
+        name: "Vardar River Galleys",
+        description: "The wooden tourist ships look like ghosts in the dark. The river current is strong here, swirling around the piles of the bridge.",
+        npcs: [],
+        searches: [
+          { id: "s7", description: "Caught in the low-hanging branches of a willow tree near the galley, you spot something metallic. It's a heavy brass statuette—covered in dried blood.", clueId: "murder_weapon" }
+        ]
+      },
+      "markov_residence": {
+        id: "markov_residence",
+        name: "Markov Estate",
+        description: "A fortress of glass and marble in Vodno. The home of Goran Markov and his wife, Marija. Money can't hide the tension in the air here.",
+        npcs: ["markov", "marija"],
+        searches: [
+          { id: "s8", description: "In the hallway, you see a collection of brass statuettes. One is missing from its pedestal.", clueId: "missing_statuette" }
+        ]
       }
     },
     npcs: {
       "viktor": {
         id: "viktor",
         name: "Chief Inspector Viktor Nikolov",
-        role: "Your Partner",
-        description: "1.88m, blonde, intense green eyes. He rubs his temples constantly.",
+        role: "Partner",
+        description: "Tall, weary, and perpetually reaching for his temples.",
         initialNode: "v_start",
         dialogue: {
           "v_start": {
             id: "v_start",
             speaker: "Viktor",
-            text: "My head is killing me. The light from that bridge scene was too much. What did we find, partner?",
+            text: "My brain is vibrating. This city is too loud for justice. What have you found in the Stojanov case?",
             options: [
-              { text: "Remind me about the victim.", nextId: "v_recap" },
-              { text: "What's our next move, Viktor?", nextId: "v_hint" },
-              { text: "We need to look at the suspects.", nextId: "v_suspects" },
-              { text: "I'll get back to it.", nextId: "v_exit" }
+              { text: "I need a fresh pair of eyes on this.", nextId: "v_help" },
+              { text: "Who are our key suspects?", nextId: "v_suspects" },
+              { text: "I'll keep digging.", nextId: "v_exit" }
             ]
           },
-          "v_recap": {
-            id: "v_recap",
-            speaker: "Viktor",
-            text: "Petar Stojanov. 54 years old. Real estate shark. Found face down under the Stone Bridge at 3 AM. Someone caved his skull in with a heavy object. He was last seen in Debar Maalo around midnight.",
-            options: [
-              { text: "Got it. Let's look at the suspects.", nextId: "v_suspects" },
-              { text: "Back to business.", nextId: "v_start" }
-            ]
-          },
-          "v_hint": {
-            id: "v_hint",
+          "v_help": {
+            id: "v_help",
             speaker: "Viktor",
             text: "[DYNAMIC_HINT]",
-            options: [
-              { text: "Got it. Let's keep moving.", nextId: "v_start" }
-            ]
+            options: [{ text: "Understood.", nextId: "v_start" }]
           },
           "v_suspects": {
             id: "v_suspects",
             speaker: "Viktor",
-            text: "We have three main players: His ex-wife Sandra, his business rival Markov, and that shady secretary Elena. Markov has the power, Sandra has the history, Elena has the keys.",
-            options: [
-              { text: "Let's talk about Markov.", nextId: "v_markov_info" },
-              { text: "Tell me more about Elena.", nextId: "v_elena_info" },
-              { text: "Back to the main case.", nextId: "v_start" }
-            ]
+            text: "Markov is the obvious choice—business rivalry. But his wife, Marija... she's always been the silent partner. And Stojanov was a known womanizer. Women were his weakness and his leverage.",
+            options: [{ text: "I'll keep that in mind.", nextId: "v_start" }]
           },
-          "v_markov_info": {
-            id: "v_markov_info",
-            speaker: "Viktor",
-            text: "Markov owns half the skyline. He and Stojanov were 'frenemies'. If the deal went south, Markov stands to lose millions. He's often seen in his black SUV.",
-            options: [
-              { text: "A black SUV? Interesting.", nextId: "v_suspects", requirement: { clueId: "tire_track" } },
-              { text: "I'll keep that in mind.", nextId: "v_suspects" }
-            ]
-          },
-          "v_elena_info": {
-            id: "v_elena_info",
-            speaker: "Viktor",
-            text: "Elena. Smart, efficient, and according to the files, she's been living way beyond her means lately. Keep an eye on her.",
-            options: [
-              { text: "Back to suspects.", nextId: "v_suspects" }
-            ]
-          },
-          "v_exit": {
-            id: "v_exit",
-            speaker: "Viktor",
-            text: "Don't let the city swallow the truth, partner. I'll be at my desk if you need me.",
-            options: []
-          }
+          "v_exit": { id: "v_exit", speaker: "Viktor", text: "Go. Don't let the Vardar wash away the truth before we can catch it.", options: [] }
         }
       },
       "sandra": {
         id: "sandra",
         name: "Dr. Sandra Kovac",
         role: "Medical Examiner",
-        description: "Sharp features, dark hair, wears her lab coat like armor.",
+        description: "Clinical, sharp, and impatient.",
         initialNode: "s_start",
         dialogue: {
           "s_start": {
             id: "s_start",
             speaker: "Sandra",
-            text: "Viktor looks like he's about to collapse. Tell him to take his pills. Now, about the body...",
+            text: "Stojanov didn't just fall. He was struck. Hard. Something with weight and an edge. Like a heavy award or a statuette.",
             options: [
-              { text: "What did the autopsy show?", nextId: "s_autopsy" },
-              { text: "Did you find anything on his clothes?", nextId: "s_clothes" },
-              { text: "I've seen enough for now.", nextId: "s_exit" }
+              { text: "Could a cufflink cause these scratches?", nextId: "s_scratch", requirement: { clueId: "cufflink" } },
+              { text: "I'll let you get back to it.", nextId: "s_exit" }
             ]
           },
-          "s_autopsy": {
-            id: "s_autopsy",
+          "s_scratch": {
+            id: "s_scratch",
             speaker: "Sandra",
-            text: "Blunt force. Heavy. Likely a metal pipe or a very expensive paperweight. Time of death was between 1 and 2 AM.",
-            options: [
-              { text: "Thanks, Sandra.", nextId: "s_start" }
-            ]
+            text: "A struggle. Yes. He probably ripped that cufflink off his killer. Check for missing jewelry or damaged clothing on your suspects.",
+            options: [{ text: "Check.", nextId: "s_start" }]
           },
-          "s_clothes": {
-            id: "s_clothes",
-            speaker: "Sandra",
-            text: "He was missing a cufflink. Luxury brand. If you find the match, you find the killer. Or at least someone who was wrestling with him.",
-            options: [
-              { text: "A cufflink... noted.", nextId: "s_start" }
-            ]
-          },
-          "s_exit": {
-            id: "s_exit",
-            speaker: "Sandra",
-            text: "Try not to become a client of mine, Detective.",
-            options: []
-          }
+          "s_exit": { id: "s_exit", speaker: "Sandra", text: "And close the door on your way out.", options: [] }
         }
       },
       "waiter": {
         id: "waiter",
-        name: "Lazo 'The Lip' Stojmenov",
-        role: "Waiter at Kafana Trend",
-        description: "Tired eyes, smells of rakija and smoke.",
+        name: "Lazo",
+        role: "Waiter",
+        description: "Knows too much, says too little.",
         initialNode: "l_start",
         dialogue: {
           "l_start": {
             id: "l_start",
             speaker: "Lazo",
-            text: "Stojanov? Yeah, he was here. Arguing with a guy in a suit. Real tense.",
+            text: "Stojanov? He was here with a woman. Not his wife. She looked expensive and very, very angry. They left in a hurry.",
             options: [
-              { text: "Did you see where they went?", nextId: "l_exit" },
-              { text: "I'm looking for evidence.", nextId: "l_exit_dialogue" }
+              { text: "Where were they headed?", nextId: "l_info" },
+              { text: "Thanks.", nextId: "l_exit" }
             ]
           },
-          "l_exit": {
-            id: "l_exit",
+          "l_info": {
+            id: "l_info",
             speaker: "Lazo",
-            text: "They headed towards the Stone Bridge. Stojanov looked drunk. The other guy... he looked focused.",
-            options: [
-              { text: "Thanks for the info.", nextId: "l_start" }
-            ]
+            text: "She mentioned 'Room 402'. I didn't catch the hotel, but she mentioned it was 'near the Bazaar'. Arka fits the bill.",
+            options: [{ text: "Arka. Got it.", nextId: "l_start" }]
           },
-          "l_exit_dialogue": {
-            id: "l_exit_dialogue",
-            speaker: "Lazo",
-            text: "Look, I got tables to clear. Ask around if you want, but don't scare off the regulars.",
-            options: []
-          }
+          "l_exit": { id: "l_exit", speaker: "Lazo", text: "Watch your back, detective.", options: [] }
         }
       },
       "markov": {
         id: "markov",
         name: "Goran Markov",
-        role: "CEO, Markov Skies",
-        description: "Dressed in a three-piece suit that costs more than your car. Smug expression.",
+        role: "Business Partner",
+        description: "A man who buys cities and burns bridges.",
         initialNode: "m_start",
         dialogue: {
           "m_start": {
             id: "m_start",
-            speaker: "Markov",
-            text: "Detective. I assume you're here about the tragedy. Stojanov and I were close colleagues.",
+            speaker: "Goran",
+            text: "Stojanov was a parasite. But I didn't kill him. I'm a businessman, not a thug. Ask my wife if you want a character witness.",
             options: [
-              { text: "You were seen arguing with him.", nextId: "m_argument" },
-              { text: "Nice SUV in the parking lot.", nextId: "m_suv" },
-              { text: "I'll be seeing you, Markov.", nextId: "m_exit" }
+              { text: "Where is Marija?", nextId: "m_wife" },
+              { text: "I'll be seeing you.", nextId: "m_exit" }
             ]
           },
-          "m_argument": {
-            id: "m_argument",
-            speaker: "Markov",
-            text: "Business is a contact sport. We disagreed on the Taftalidze project, but murder? I have a reputation to maintain.",
-            options: [
-              { text: "Back to the point.", nextId: "m_start" }
-            ]
+          "m_wife": {
+            id: "m_wife",
+            speaker: "Goran",
+            text: "She's upstairs. She's been... fragile since the news. They were 'close' once.",
+            options: [{ text: "Close. I see.", nextId: "m_start" }]
           },
-          "m_suv": {
-            id: "m_suv",
-            speaker: "Markov",
-            text: "An armored G-Wagon. Essential for a man in my position. Why do you ask?",
-            options: [
-              { text: "Just admiring the treads.", nextId: "m_start" }
-            ]
-          },
-          "m_exit": {
-            id: "m_exit",
-            speaker: "Markov",
-            text: "Don't let the door hit you on the way out. My lawyers are very sensitive to harassment.",
-            options: []
-          }
+          "m_exit": { id: "m_exit", speaker: "Goran", text: "Get out of my house.", options: [] }
         }
       },
-      "secretary": {
-        id: "secretary",
-        name: "Elena Popova",
-        role: "Executive Secretary",
-        description: "Perfectly polished, but her hands are shaking. She won't meet your eye.",
-        initialNode: "e_start",
+      "marija": {
+        id: "marija",
+        name: "Marija Markova",
+        role: "The Wife",
+        description: "Dressed in mourning black. Her eyes are dry and cold.",
+        initialNode: "mr_start",
         dialogue: {
-          "e_start": {
-            id: "e_start",
-            speaker: "Elena",
-            text: "Mr. Stojanov was a complicated man. I just handle his schedule.",
+          "mr_start": {
+            id: "mr_start",
+            speaker: "Marija",
+            text: "Petar was a fool. He thought he could use me to destroy Goran. He didn't realize that in Skopje, you don't use people like me.",
             options: [
-              { text: "His schedule for last night was empty.", nextId: "e_lie" },
-              { text: "I'll be back later.", nextId: "e_exit" }
+              { text: "Explain your presence at Hotel Arka.", nextId: "mr_confront", requirement: { clueId: "hotel_card" } },
+              { text: "Does this cufflink look familiar?", nextId: "mr_cufflink", requirement: { clueId: "cufflink" } },
+              { text: "Goodbye.", nextId: "mr_exit" }
             ]
           },
-          "e_lie": {
-            id: "e_lie",
-            speaker: "Elena",
-            text: "He... he often took private meetings in Debar Maalo. I don't ask questions.",
-            options: [
-              { text: "You seem nervous, Elena.", nextId: "e_nervous", requirement: { clueId: "receipt" } },
-              { text: "I'll be back.", nextId: "e_start" }
-            ]
+          "mr_confront": {
+            id: "mr_confront",
+            speaker: "Marija",
+            text: "We had a history. A mistake. But Petar wanted more than just my company—he wanted Goran's empire. He threatened to expose us.",
+            options: [{ text: "Go on.", nextId: "mr_start" }]
           },
-          "e_nervous": {
-            id: "e_nervous",
-            speaker: "Elena",
-            text: "Fine! He was meeting Markov. They were supposed to merge companies, but Stojanov backed out. Markov was furious. They left for a 'walk' near the river.",
-            options: [
-              { text: "Markov. Interesting.", nextId: "e_start" }
-            ]
+          "mr_cufflink": {
+            id: "mr_cufflink",
+            speaker: "Marija",
+            text: "That was his. He clutched it like a trophy. He thought he owned me. He was wrong.",
+            options: [{ text: "I have questions about a missing statuette.", nextId: "mr_start", requirement: { clueId: "missing_statuette" } }]
           },
-          "e_exit": {
-            id: "e_exit",
-            speaker: "Elena",
-            text: "Please... I have a lot of work to catch up on. His death has caused chaos.",
-            options: []
-          }
+          "mr_exit": { id: "mr_exit", speaker: "Marija", text: "I have nothing more to say to the police.", options: [] }
         }
       }
     },
     clues: {
-      "cufflink": { id: "cufflink", name: "S-Engraved Cufflink", description: "A gold cufflink found at the crime scene. Matches Stojanov's initials, but one is missing from his body." },
-      "tire_track": { id: "tire_track", name: "Heavy Tire Prints", description: "Found near the bridge. Likely from a heavy SUV." },
-      "receipt": { id: "receipt", name: "Kafana Receipt", description: "Shows a large dinner for three people, paid by Stojanov." },
-      "shredded_docs": { id: "shredded_docs", name: "Shredded Merger Contract", description: "Evidence that the business deal with Markov was falling apart violently." }
+      "tire_track": { id: "tire_track", name: "SUV Tire Tracks", description: "Heavy treads found at the Stone Bridge. Matches Goran Markov's G-Wagon." },
+      "receipt": { id: "receipt", name: "Kafana Receipt", description: "A receipt from Debar Maalo. Leads to Lazo the waiter." },
+      "hotel_card": { id: "hotel_card", name: "Hotel Arka Card", description: "Found in Debar Maalo. Mentions Room 402." },
+      "cufflink": { id: "cufflink", name: "S-Cufflink", description: "Found in Hotel Arka. A match for the victim's missing one." },
+      "blackmail_docs": { id: "blackmail_docs", name: "Blackmail Files", description: "Proves Stojanov was forcing Marija to spy on her husband." },
+      "murder_weapon": { id: "murder_weapon", name: "Brass Statuette", description: "The murder weapon. Found in the Vardar. It matches the set at the Markov estate." },
+      "missing_statuette": { id: "missing_statuette", name: "Empty Pedestal", description: "A missing piece from a collection at the Markov house." },
+      "migraine_relief": { id: "migraine_relief", name: "Painkillers", description: "Viktor's meds. Essential for keeping him focused." }
     },
     solution: {
-      killerId: "secretary",
-      motive: "Embezzlement & Cover-up",
-      evidenceId: "shredded_docs"
+      killerId: "marija",
+      motive: "Personal Vendetta",
+      evidenceId: "murder_weapon"
     }
   }
 };
