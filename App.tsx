@@ -93,7 +93,7 @@ const WALKMAN_TRACKS = [
   { title: "Va Va Voom - Nicki Minaj", context: "He suppresses a rare smile. 'The kids in the precinct play this. It's... catchy.'" },
   { title: "Running up that hill - Placebo", context: "Viktor sighs. 'Always climbing, never reaching the top.'" },
   { title: "It's no good - Depeche Mode", context: "The synths help him block out the buzzing in his skull." },
-  { title: "A hard day's night - Les Crossaders", context: "He looks at his cold coffee. 'Every night in Skopje is a hard day's night.'" },
+  { title: "A hard day's night - Les Crossaders", context: "Every night in Skopje is a hard day's night.'" },
   { title: "Ante Up - M.O.P.", context: "The beat drops. Viktor's eyes sharpen. 'Time to lean on some suspects.'" },
   { title: "Skandal - Toni Zen", context: "Local Skopje vibes. 'Toni knows this city better than most of us.'" },
   { title: "The Temple of The King - Rainbow", context: "He closes his eyes. This one always takes the edge off the pain." },
@@ -150,6 +150,24 @@ const App: React.FC = () => {
 
   const currentLevel = useMemo(() => LEVELS[gameState.currentLevelId], [gameState.currentLevelId]);
   const currentLocation = useMemo(() => currentLevel.locations[gameState.currentLocationId], [currentLevel, gameState.currentLocationId]);
+
+  // Handle external clue discovery events (e.g., from dialogue)
+  useEffect(() => {
+    const handleDiscoverClue = (e: any) => {
+      const clueId = e.detail;
+      if (clueId && !gameState.discoveredClues.includes(clueId)) {
+        setGameState(prev => ({
+          ...prev,
+          discoveredClues: [...prev.discoveredClues, clueId]
+        }));
+        setFlavorText(`NEW EVIDENCE: ${currentLevel.clues[clueId]?.name || clueId}`);
+        setTimeout(() => setFlavorText(null), 3000);
+      }
+    };
+
+    window.addEventListener('discover_clue', handleDiscoverClue);
+    return () => window.removeEventListener('discover_clue', handleDiscoverClue);
+  }, [gameState.discoveredClues, currentLevel]);
 
   useEffect(() => {
     const newUnlocked = [...gameState.unlockedLocations];
@@ -275,6 +293,13 @@ const App: React.FC = () => {
     setTimeout(() => setFlavorText(null), 6000);
   };
 
+  const availableDialogueOptions = useMemo(() => {
+    if (!currentDialogue) return [];
+    return currentDialogue.options.filter(opt => 
+      !opt.requirement || (opt.requirement.clueId && gameState.discoveredClues.includes(opt.requirement.clueId))
+    );
+  }, [currentDialogue, gameState.discoveredClues]);
+
   if (showIntro) return <IntroScreen onStart={() => setShowIntro(false)} />;
 
   if (gameState.isGameOver) {
@@ -317,10 +342,7 @@ const App: React.FC = () => {
               <p className="text-zinc-300 italic leading-relaxed font-serif text-sm sm:text-lg">"{currentDialogue.text}"</p>
             </div>
             <div className="grid grid-cols-1 gap-2">
-              {currentDialogue.options.map((opt, i) => {
-                const hasReq = !opt.requirement || (opt.requirement.clueId && gameState.discoveredClues.includes(opt.requirement.clueId));
-                
-                // Wrap the selection to include the original onSelect if it exists
+              {availableDialogueOptions.map((opt, i) => {
                 const handleSelection = () => {
                    handleDialogueOption(opt.nextId, opt.onSelect);
                 };
@@ -328,15 +350,14 @@ const App: React.FC = () => {
                 return (
                   <Button 
                     key={i} 
-                    disabled={!hasReq}
                     onClick={handleSelection}
                     className="text-left justify-start"
                   >
-                    {opt.text} {!hasReq && " [MISSING EVIDENCE]"}
+                    {opt.text}
                   </Button>
                 );
               })}
-              {currentDialogue.options.length === 0 && (
+              {availableDialogueOptions.length === 0 && (
                 <Button variant="success" onClick={() => { setActiveNPC(null); setCurrentDialogue(null); }}>END CONVERSATION</Button>
               )}
             </div>
@@ -500,14 +521,15 @@ const AccusationForm: React.FC<{
 
       <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 pt-2">
         <Button variant="ghost" onClick={onClose} className="w-full py-3">CANCEL</Button>
-        <Button 
-          variant="danger" 
-          className="w-full py-3" 
-          disabled={!killer || !motive || !evidence}
-          onClick={() => onAccuse(killer, motive, evidence)}
-        >
-          EXECUTE WARRANT
-        </Button>
+        {killer && motive && evidence && (
+          <Button 
+            variant="danger" 
+            className="w-full py-3" 
+            onClick={() => onAccuse(killer, motive, evidence)}
+          >
+            EXECUTE WARRANT
+          </Button>
+        )}
       </div>
     </div>
   );

@@ -121,7 +121,6 @@ export const LEVELS: Record<number, Level> = {
             speaker: "Sandra",
             text: "Give me that. (She powders the handle). Exactly as I thought. Fingerprints. Let me cross-reference... It's a match. Marija Markova. You've got her, detective.",
             options: [{ text: "Excellent.", nextId: "s_start", onSelect: () => { 
-                // This is a special hook to trigger clue discovery via dialogue
                 window.dispatchEvent(new CustomEvent('discover_clue', { detail: 'fingerprints' }));
             }}]
           },
@@ -211,8 +210,8 @@ export const LEVELS: Record<number, Level> = {
               { text: "Explain your presence at Hotel Arka.", nextId: "mr_confront", requirement: { clueId: "hotel_card" } },
               { text: "Does this cufflink look familiar?", nextId: "mr_cufflink", requirement: { clueId: "cufflink" } },
               { text: "I found your blackmail documents.", nextId: "mr_blackmail", requirement: { clueId: "blackmail_docs" } },
-              { text: "We found the murder weapon. Admit it.", nextId: "mr_weapon_deny", requirement: { clueId: "murder_weapon" } },
-              { text: "Mention the fingerprints found in the lab.", nextId: "mr_weapon", requirement: { clueId: "fingerprints" } },
+              { text: "We found the murder weapon. Admit it.", nextId: "mr_weapon", requirement: { clueId: "fingerprints" } },
+              { text: "I found the silver trowel in the river.", nextId: "mr_weapon_deny", requirement: { clueId: "murder_weapon" } },
               { text: "Goodbye.", nextId: "mr_exit" }
             ]
           },
@@ -252,7 +251,7 @@ export const LEVELS: Record<number, Level> = {
           "mr_weapon": {
             id: "mr_weapon",
             speaker: "Marija",
-            text: "The prints... you found them? (She collapses into a chair) It was so heavy... and sharp. He laughed at me on that bridge. He said I was just a pawn in his development plan. I didn't plan it... I just couldn't let him build his empire on my bones.",
+            text: "The prints... (She collapses into a chair) It was so heavy... and sharp. He laughed at me on that bridge. He said I was just a pawn in his development plan. I didn't plan it... I just couldn't let him build his empire on my bones.",
             options: [{ text: "It's over, Marija.", nextId: "mr_exit" }]
           },
           "mr_exit": { id: "mr_exit", speaker: "Marija", text: "I have nothing more to say to the police.", options: [] }
