@@ -109,17 +109,29 @@ export const LEVELS: Record<number, Level> = {
           "s_start": {
             id: "s_start",
             speaker: "Sandra",
-            text: "Stojanov didn't just fall. He was struck. The wound is unusual—heavy impact but with a clean, flat cutting edge. Like a heavy ceremonial tool.",
+            text: "The lab is a mess. I'm busy. Unless you have something physical from the scene, get out of my sight.",
             options: [
-              { text: "Could a cufflink cause these scratches?", nextId: "s_scratch", requirement: { clueId: "cufflink" } },
-              { text: "I'll let you get back to it.", nextId: "s_exit" }
+              { text: "Analyze the silver trowel.", nextId: "s_trowel", requirement: { clueId: "murder_weapon" } },
+              { text: "Check the cufflink for DNA.", nextId: "s_cufflink_lab", requirement: { clueId: "cufflink" } },
+              { text: "I'll leave you to your work.", nextId: "s_exit" }
             ]
           },
-          "s_scratch": {
-            id: "s_scratch",
+          "s_trowel": {
+            id: "s_trowel",
             speaker: "Sandra",
-            text: "A struggle. Yes. He probably ripped that cufflink off his killer. Check for missing jewelry or damaged clothing on your suspects.",
-            options: [{ text: "Check.", nextId: "s_start" }]
+            text: "Give me that. (She powders the handle). Exactly as I thought. Fingerprints. Let me cross-reference... It's a match. Marija Markova. You've got her, detective.",
+            options: [{ text: "Excellent.", nextId: "s_start", onSelect: () => { 
+                // This is a special hook to trigger clue discovery via dialogue
+                window.dispatchEvent(new CustomEvent('discover_clue', { detail: 'fingerprints' }));
+            }}]
+          },
+          "s_cufflink_lab": {
+            id: "s_cufflink_lab",
+            speaker: "Sandra",
+            text: "This gold 'S' has skin cells caught in the engraving. The DNA sequencer doesn't lie. It's Marija's. She was struggling with him when he died.",
+            options: [{ text: "Good work, Sandra.", nextId: "s_start", onSelect: () => {
+                window.dispatchEvent(new CustomEvent('discover_clue', { detail: 'forensic_report' }));
+            }}]
           },
           "s_exit": { id: "s_exit", speaker: "Sandra", text: "And close the door on your way out.", options: [] }
         }
@@ -199,9 +211,16 @@ export const LEVELS: Record<number, Level> = {
               { text: "Explain your presence at Hotel Arka.", nextId: "mr_confront", requirement: { clueId: "hotel_card" } },
               { text: "Does this cufflink look familiar?", nextId: "mr_cufflink", requirement: { clueId: "cufflink" } },
               { text: "I found your blackmail documents.", nextId: "mr_blackmail", requirement: { clueId: "blackmail_docs" } },
-              { text: "I found the Silver Trowel in the Vardar.", nextId: "mr_weapon", requirement: { clueId: "murder_weapon" } },
+              { text: "We found the murder weapon. Admit it.", nextId: "mr_weapon_deny", requirement: { clueId: "murder_weapon" } },
+              { text: "Mention the fingerprints found in the lab.", nextId: "mr_weapon", requirement: { clueId: "fingerprints" } },
               { text: "Goodbye.", nextId: "mr_exit" }
             ]
+          },
+          "mr_weapon_deny": {
+            id: "mr_weapon_deny",
+            speaker: "Marija",
+            text: "A silver trowel? Yes, we have many. Petar probably took it himself. You have no proof I ever touched it last night.",
+            options: [{ text: "We'll see about that.", nextId: "mr_start" }]
           },
           "mr_confront": {
             id: "mr_confront",
@@ -233,7 +252,7 @@ export const LEVELS: Record<number, Level> = {
           "mr_weapon": {
             id: "mr_weapon",
             speaker: "Marija",
-            text: "It was so heavy... and sharp. He laughed at me on that bridge. He said I was just a pawn in his development plan. I didn't plan it... I just couldn't let him build his empire on my bones.",
+            text: "The prints... you found them? (She collapses into a chair) It was so heavy... and sharp. He laughed at me on that bridge. He said I was just a pawn in his development plan. I didn't plan it... I just couldn't let him build his empire on my bones.",
             options: [{ text: "It's over, Marija.", nextId: "mr_exit" }]
           },
           "mr_exit": { id: "mr_exit", speaker: "Marija", text: "I have nothing more to say to the police.", options: [] }
@@ -246,7 +265,9 @@ export const LEVELS: Record<number, Level> = {
       "hotel_card": { id: "hotel_card", name: "Hotel Arka Card", description: "Found in Debar Maalo. Mentions Room 402." },
       "cufflink": { id: "cufflink", name: "S-Cufflink", description: "Found in Hotel Arka. A match for the victim's missing one." },
       "blackmail_docs": { id: "blackmail_docs", name: "Blackmail Files", description: "Proves Stojanov was forcing Marija to spy on her husband." },
-      "murder_weapon": { id: "murder_weapon", name: "Silver Trowel", description: "The murder weapon. A heavy construction tool etched with the victim's name. Found in the Vardar." },
+      "murder_weapon": { id: "murder_weapon", name: "Silver Trowel", description: "The murder weapon. Found in the Vardar. Needs lab analysis." },
+      "fingerprints": { id: "fingerprints", name: "Marija's Prints", description: "Forensic match: Marija's fingerprints found on the murder weapon." },
+      "forensic_report": { id: "forensic_report", name: "Cufflink Lab Report", description: "Skin cells on the cufflink provide a DNA match for Marija Markova." },
       "missing_statuette": { id: "missing_statuette", name: "Empty Display Case", description: "The presentation case for the silver trowel is empty at the Markov house." },
       "migraine_relief": { id: "migraine_relief", name: "Painkillers", description: "Viktor's meds. Essential for keeping him focused." }
     },

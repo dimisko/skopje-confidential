@@ -30,40 +30,32 @@ const Button: React.FC<{
   );
 };
 
-const DossierHeader: React.FC<{ level: Level; status: string; migraine: number }> = ({ level, status, migraine }) => (
+const DossierHeader: React.FC<{ level: Level; migraine: number }> = ({ level, migraine }) => (
   <header className="bg-[#e6dcc5] text-zinc-900 border-b-2 border-[#b09b78] shadow-lg sticky top-0 z-[60] w-full">
     <div className="p-3 md:p-4 flex flex-col space-y-2">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-4">
-        <div className="flex-1 space-y-1 overflow-hidden w-full">
-          <div className="flex items-center gap-2">
+      <div className="flex justify-between items-start gap-3">
+        <div className="flex-1 space-y-1 min-w-0">
+          <div className="flex items-center gap-2 flex-wrap">
             <span className="px-1.5 py-0.5 bg-red-800 text-white text-[8px] font-bold shrink-0">TOP SECRET</span>
-            <h1 className="text-sm md:text-xl font-bold tracking-tighter uppercase truncate">{level.title}</h1>
+            <h1 className="text-sm md:text-xl font-bold tracking-tighter uppercase truncate leading-tight">{level.title}</h1>
           </div>
-          <p className="text-[9px] md:text-[10px] font-mono font-bold border-t border-black/10 pt-1 leading-tight opacity-70 truncate md:whitespace-normal">
-            {level.caseFile}
-          </p>
         </div>
         
-        <div className="flex items-center gap-4 shrink-0 self-end sm:self-center">
-          <div className="text-right">
-            <p className="text-[7px] sm:text-[8px] font-bold uppercase tracking-widest text-zinc-600 mb-0.5 whitespace-nowrap">MIGRAINE</p>
-            <div className="w-16 sm:w-24 h-1.5 sm:h-2 bg-black/10 border border-black/20 overflow-hidden">
-              <div 
-                className={`h-full transition-all duration-1000 ${migraine > 75 ? 'bg-red-700' : 'bg-amber-800'}`} 
-                style={{ width: `${migraine}%` }}
-              />
-            </div>
+        <div className="shrink-0 flex flex-col items-end">
+          <p className="text-[7px] sm:text-[8px] font-bold uppercase tracking-widest text-zinc-600 mb-0.5 whitespace-nowrap">MIGRAINE</p>
+          <div className="w-16 sm:w-24 h-1.5 sm:h-2 bg-black/10 border border-black/20 overflow-hidden">
+            <div 
+              className={`h-full transition-all duration-1000 ${migraine > 75 ? 'bg-red-700' : 'bg-amber-800'}`} 
+              style={{ width: `${migraine}%` }}
+            />
           </div>
         </div>
       </div>
-
-      <div className="bg-black/5 border-t border-black/20 p-2 -mx-3 md:-mx-4 px-4 md:px-8 flex items-center gap-2 md:gap-3 overflow-hidden">
-        <span className="text-[8px] md:text-[9px] font-black uppercase text-red-900 shrink-0 bg-red-900/10 px-1 border border-red-900/20">STATUS:</span>
-        <div className="flex-1 overflow-hidden">
-          <p className="text-[10px] md:text-[11px] font-mono font-bold text-zinc-800 italic leading-snug truncate">
-            {status}
-          </p>
-        </div>
+      
+      <div className="border-t border-black/10 pt-1.5">
+        <p className="text-[10px] md:text-[11px] font-mono font-bold leading-snug opacity-80 text-zinc-800">
+          {level.caseFile}
+        </p>
       </div>
     </div>
   </header>
@@ -84,7 +76,7 @@ const IntroScreen: React.FC<{ onStart: () => void }> = ({ onStart }) => (
         <p><span className="text-zinc-100 font-bold uppercase">PROLOGUE:</span> You are a Junior Detective transferred from Bitola. Skopje is meaner and smells of old cigarette ash.</p>
         <p>You've been assigned to <span className="text-zinc-100">Chief Inspector Viktor Nikolov</span>. He's a legend, but corruption has given him a permanent, debilitating migraine.</p>
         <p><span className="text-red-600 font-bold uppercase">THE CASE:</span> Petar Stojanov, a developer, was found dead at 3:00 AM on the Stone Bridge. Left for the Vardar to claim. No witnesses.</p>
-        <p>Viktor is waiting. Keep your head down. The truth is rarely clean.</p>
+        <p>Viktor is waiting. Keep your head down. <span className="text-zinc-100 font-bold uppercase underline">IMPORTANT:</span> If you are stuck or need guidance on evidence, return to the station and <span className="text-zinc-100 font-bold">TALK TO VIKTOR</span> directly. He knows how this city breathes.</p>
       </div>
 
       <div className="pt-4">
@@ -95,11 +87,36 @@ const IntroScreen: React.FC<{ onStart: () => void }> = ({ onStart }) => (
 );
 
 const WALKMAN_TRACKS = [
-  { title: "Bijelo Dugme - Lipe Cvatu", context: "Viktor used to play this on his first patrol car. Reminds him of simpler times." },
-  { title: "EKV - Krug", context: "Played when the case hits a dead end. 'This circle is spinning...' he mutters." },
-  { title: "Azra - Balkan", context: "Sound of a generation that saw the future clearly." },
-  { title: "Leb i Sol - Aber Dojde Donke", context: "Pure Skopje soul. Helps him navigate complex lies." },
-  { title: "Parni Valjak - Jesen u meni", context: "The heavy air, damp concrete, and a case that refuses to close." }
+  { title: "I was made for lovin' you - KISS", context: "Viktor taps his fingers on the steering wheel. 'A classic for a messy city.'" },
+  { title: "Can't Fight the Moonlight - LeAnn Rimes", context: "He looks at the Stone Bridge. 'Some things you just can't fight, partner.'" },
+  { title: "In the army now - Status Quo", context: "Reminds him of his mandatory service in the 90s. Heavy air, heavy boots." },
+  { title: "Va Va Voom - Nicki Minaj", context: "He suppresses a rare smile. 'The kids in the precinct play this. It's... catchy.'" },
+  { title: "Running up that hill - Placebo", context: "Viktor sighs. 'Always climbing, never reaching the top.'" },
+  { title: "It's no good - Depeche Mode", context: "The synths help him block out the buzzing in his skull." },
+  { title: "A hard day's night - Les Crossaders", context: "He looks at his cold coffee. 'Every night in Skopje is a hard day's night.'" },
+  { title: "Ante Up - M.O.P.", context: "The beat drops. Viktor's eyes sharpen. 'Time to lean on some suspects.'" },
+  { title: "Skandal - Toni Zen", context: "Local Skopje vibes. 'Toni knows this city better than most of us.'" },
+  { title: "The Temple of The King - Rainbow", context: "He closes his eyes. This one always takes the edge off the pain." },
+  { title: "The best is yet to come - Sinatra", context: "Pure irony. In this department, the best is usually a closed file." },
+  { title: "Mother - Danzig", context: "He thinks about the mothers who never got justice. It fuels him." },
+  { title: "Say you will - Foreigner", context: "Viktor hums along. '80s rock... the only thing that doesn't change.'" },
+  { title: "Safari song - Greta van Fleet", context: "Energy. Raw power. He feels the migraine receding slightly." },
+  { title: "Lust for life - Iggy Pop", context: "Despite the corruption, Viktor still has a bit of this left." },
+  { title: "Ace of Spades - Motorhead", context: "He turns the volume up. 'Lemmy understood the gamble of this job.'" },
+  { title: "Brave new world - Iron maiden", context: "He looks at the new glass buildings. 'Nothing's brave about it, Steve.'" },
+  { title: "My one and only love - John Coltrane", context: "The sax calms the storm in his head. Perfection." },
+  { title: "Take a look around - Limp Bizkit", context: "The mission: impossible theme for a mission that feels impossible." },
+  { title: "Back in black - AC/DC", context: "The ultimate return. 'Back to work,' he mutters." },
+  { title: "Ain't talkin' bout love - Van Halen", context: "Viktor remembers his first leather jacket. It's in a box somewhere." },
+  { title: "In Walks Barbarella - Clutch", context: "Groovy. Weird. Just like a night in Debar Maalo." },
+  { title: "O Children - Nick Cave", context: "The darkness of the track matches the depth of the Vardar." },
+  { title: "Bella Stella - Highland", context: "A bit of opera to class up the crime scene." },
+  { title: "Caught out in the rain - Beth Hart", context: "Every detective in Skopje has been here. Literally and figuratively." },
+  { title: "Sound of da police - KRS-One", context: "He chuckles. 'Woop-woop... that's us, partner.'" },
+  { title: "Bella Ciao", context: "An anthem for those who keep fighting the good fight." },
+  { title: "Movin' On - Tom Meighan", context: "Viktor checks his watch. We have to keep moving." },
+  { title: "Hells Bells - AC/DC", context: "The tolling bell. It's either for the victim or the killer." },
+  { title: "Don't Stop Belivin' - Journey", context: "'Believe in the evidence,' Viktor says. 'The rest is just noise.'" }
 ];
 
 const App: React.FC = () => {
@@ -174,6 +191,7 @@ const App: React.FC = () => {
     if (!clues.includes('hotel_card')) return "Head to Debar Maalo.";
     if (!clues.includes('cufflink')) return "Arka. Room 402. The trail goes cold otherwise.";
     if (!clues.includes('murder_weapon')) return "Check the Galleys.";
+    if (!clues.includes('fingerprints')) return "Talk to Dr. Kovac at the station lab.";
     if (!clues.includes('missing_statuette')) return "Head to the Markov estate.";
     if (!clues.includes('blackmail_docs')) return "Need motive from the Arka safe.";
 
@@ -211,8 +229,13 @@ const App: React.FC = () => {
     setCurrentDialogue(npc.dialogue[npc.initialNode]);
   };
 
-  const handleDialogueOption = (nextId: string) => {
+  const handleDialogueOption = (nextId: string, onSelect?: () => void) => {
     if (!activeNPC) return;
+    
+    if (onSelect) {
+      onSelect();
+    }
+
     if (!nextId || !activeNPC.dialogue[nextId]) {
       setActiveNPC(null);
       setCurrentDialogue(null);
@@ -242,7 +265,13 @@ const App: React.FC = () => {
     const nextIndex = (walkmanTrackIndex + 1) % WALKMAN_TRACKS.length;
     setWalkmanTrackIndex(nextIndex);
     const track = WALKMAN_TRACKS[nextIndex];
-    setFlavorText(`📻 ${track.title}: ${track.context}`);
+    
+    setGameState(prev => ({
+      ...prev,
+      migraineLevel: Math.max(0, prev.migraineLevel - 5)
+    }));
+
+    setFlavorText(`📻 NOW PLAYING: ${track.title} -- ${track.context} (MIGRAINE REDUCED)`);
     setTimeout(() => setFlavorText(null), 6000);
   };
 
@@ -269,11 +298,11 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen max-w-4xl mx-auto flex flex-col border-x border-zinc-800 bg-[#0a0a0a] shadow-2xl relative grainy font-mono">
-      <DossierHeader level={currentLevel} status={currentStatus} migraine={gameState.migraineLevel} />
+      <DossierHeader level={currentLevel} migraine={gameState.migraineLevel} />
 
       <main className="flex-1 overflow-y-auto p-4 md:p-8 space-y-6 md:space-y-8 pb-32">
         {flavorText && (
-          <div className="fixed top-24 left-4 right-4 md:left-1/2 md:-translate-x-1/2 md:max-w-md bg-amber-950 text-amber-100 p-3 sm:p-4 border-2 border-amber-600 text-[9px] sm:text-xs z-[70] animate-in fade-in slide-in-from-top-2 duration-300 shadow-2xl uppercase text-center">
+          <div className="fixed top-24 left-4 right-4 md:left-1/2 md:-translate-x-1/2 md:max-w-md bg-amber-950 text-amber-100 p-3 sm:p-4 border-2 border-amber-600 text-[9px] sm:text-xs z-[70] animate-in fade-in slide-in-from-top-2 duration-300 shadow-2xl uppercase text-center border-double">
             {flavorText}
           </div>
         )}
@@ -290,11 +319,17 @@ const App: React.FC = () => {
             <div className="grid grid-cols-1 gap-2">
               {currentDialogue.options.map((opt, i) => {
                 const hasReq = !opt.requirement || (opt.requirement.clueId && gameState.discoveredClues.includes(opt.requirement.clueId));
+                
+                // Wrap the selection to include the original onSelect if it exists
+                const handleSelection = () => {
+                   handleDialogueOption(opt.nextId, opt.onSelect);
+                };
+
                 return (
                   <Button 
                     key={i} 
                     disabled={!hasReq}
-                    onClick={() => handleDialogueOption(opt.nextId)}
+                    onClick={handleSelection}
                     className="text-left justify-start"
                   >
                     {opt.text} {!hasReq && " [MISSING EVIDENCE]"}
@@ -323,11 +358,19 @@ const App: React.FC = () => {
                 <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                 SEARCH AREA
               </Button>
-              {currentLocation.npcs.map(nId => (
-                <Button key={nId} onClick={() => startDialogue(nId)} variant="dossier" className="flex-1 py-4 text-xs font-bold border-2">
-                  INTERROGATE {currentLevel.npcs[nId].name.split(' ')[0]}
-                </Button>
-              ))}
+              {currentLocation.npcs.map(nId => {
+                const npc = currentLevel.npcs[nId];
+                let label = "";
+                if (nId === 'viktor') label = "TALK TO VIKTOR";
+                else if (nId === 'sandra') label = "TALK TO DR. KOVAC";
+                else label = `INTERROGATE ${npc.name.split(' ')[0]}`;
+                
+                return (
+                  <Button key={nId} onClick={() => startDialogue(nId)} variant="dossier" className="flex-1 py-4 text-xs font-bold border-2">
+                    {label}
+                  </Button>
+                );
+              })}
             </section>
 
             <section className="space-y-3 sm:space-y-4 border-t border-zinc-900 pt-6">
@@ -378,10 +421,10 @@ const App: React.FC = () => {
         <div className="flex gap-2">
           <Button 
             variant="ghost" 
-            className="text-[8px] sm:text-[9px] text-amber-500/80 p-2 sm:px-4" 
+            className="text-[8px] sm:text-[9px] text-amber-500/80 p-2 sm:px-4 border-amber-900/30" 
             onClick={toggleWalkman}
           >
-            <span>📻</span> <span className="hidden sm:inline">WALKMAN</span>
+            <span>📻 WALKMAN</span>
           </Button>
         </div>
         
