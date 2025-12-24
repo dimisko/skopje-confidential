@@ -10,7 +10,7 @@ const Button: React.FC<{
   variant?: 'primary' | 'danger' | 'ghost' | 'success' | 'dossier' | 'paper';
   className?: string;
 }> = ({ onClick, children, disabled, variant = 'primary', className = "" }) => {
-  const baseStyles = "px-4 py-2 font-mono text-xs transition-all duration-200 uppercase tracking-tighter border";
+  const baseStyles = "px-4 py-2 font-mono text-xs transition-all duration-200 uppercase tracking-tighter border flex items-center gap-2 justify-center";
   const variants = {
     primary: "bg-amber-900/20 text-amber-500 border-amber-900/50 hover:bg-amber-900/40",
     danger: "bg-red-900/20 text-red-500 border-red-900/50 hover:bg-red-900/40",
@@ -30,32 +30,41 @@ const Button: React.FC<{
   );
 };
 
-const DossierHeader: React.FC<{ level: Level; objective: string; migraine: number }> = ({ level, objective, migraine }) => (
-  <header className="bg-[#e6dcc5] text-zinc-900 border-b-2 border-[#b09b78] shadow-lg sticky top-0 z-[60]">
-    <div className="p-4 flex flex-col md:flex-row justify-between items-center gap-4">
-      <div className="flex-1 space-y-1">
-        <div className="flex items-center gap-2">
-          <span className="px-2 py-0.5 bg-red-800 text-white text-[9px] font-bold">TOP SECRET</span>
-          <h1 className="text-xl font-bold tracking-tighter uppercase">{level.title}</h1>
-        </div>
-        <p className="text-[10px] font-mono font-bold border-t border-black/20 pt-1 leading-tight">
-          {level.caseFile}
-        </p>
-      </div>
-      
-      <div className="flex items-center gap-6 border-l border-black/10 pl-6 h-full">
-        <div className="text-right">
-          <p className="text-[8px] font-bold uppercase tracking-widest text-zinc-600 mb-1">Lead Status</p>
-          <p className="text-[11px] font-mono font-bold animate-pulse text-red-900 italic max-w-[200px] truncate">{objective}</p>
-        </div>
-        <div className="text-right hidden sm:block">
-          <p className="text-[8px] font-bold uppercase tracking-widest text-zinc-600 mb-1">VIKTOR'S MIGRAINE</p>
-          <div className="w-24 h-2 bg-black/10 border border-black/20 overflow-hidden">
-            <div 
-              className={`h-full transition-all duration-1000 ${migraine > 75 ? 'bg-red-700' : 'bg-amber-800'}`} 
-              style={{ width: `${migraine}%` }}
-            />
+const DossierHeader: React.FC<{ level: Level; status: string; migraine: number }> = ({ level, status, migraine }) => (
+  <header className="bg-[#e6dcc5] text-zinc-900 border-b-2 border-[#b09b78] shadow-lg sticky top-0 z-[60] w-full">
+    <div className="p-3 md:p-4 flex flex-col space-y-2">
+      {/* Top Row: Case Details & Health */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div className="flex-1 space-y-1 overflow-hidden">
+          <div className="flex items-center gap-2">
+            <span className="px-2 py-0.5 bg-red-800 text-white text-[9px] font-bold shrink-0">TOP SECRET</span>
+            <h1 className="text-lg md:text-xl font-bold tracking-tighter uppercase truncate">{level.title}</h1>
           </div>
+          <p className="text-[10px] font-mono font-bold border-t border-black/10 pt-1 leading-tight opacity-70 truncate">
+            {level.caseFile}
+          </p>
+        </div>
+        
+        <div className="flex items-center gap-4 shrink-0 self-end md:self-center">
+          <div className="text-right hidden sm:block">
+            <p className="text-[8px] font-bold uppercase tracking-widest text-zinc-600 mb-1 whitespace-nowrap">VIKTOR'S MIGRAINE</p>
+            <div className="w-24 h-2 bg-black/10 border border-black/20 overflow-hidden">
+              <div 
+                className={`h-full transition-all duration-1000 ${migraine > 75 ? 'bg-red-700' : 'bg-amber-800'}`} 
+                style={{ width: `${migraine}%` }}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Bottom Row: Unified Status Bar */}
+      <div className="bg-black/5 border-t border-black/20 p-2 -mx-4 px-8 flex items-center gap-3 overflow-hidden">
+        <span className="text-[9px] font-black uppercase text-red-900 shrink-0 bg-red-900/10 px-1 border border-red-900/20">STATUS & ADVICE:</span>
+        <div className="flex-1 overflow-hidden">
+          <p className="text-[11px] font-mono font-bold text-zinc-800 italic leading-snug truncate md:whitespace-normal">
+            {status}
+          </p>
         </div>
       </div>
     </div>
@@ -87,9 +96,18 @@ const IntroScreen: React.FC<{ onStart: () => void }> = ({ onStart }) => (
   </div>
 );
 
+const WALKMAN_TRACKS = [
+  { title: "Bijelo Dugme - Lipe Cvatu", context: "Viktor used to play this on his first patrol car. It reminds him of a time when justice felt simpler." },
+  { title: "EKV - Krug", context: "This song always plays when the case hits a dead end. 'This circle is spinning...' he mutters." },
+  { title: "Azra - Balkan", context: "He listens to this when the city gets too loud. It's the sound of a generation that saw the future clearly." },
+  { title: "Leb i Sol - Aber Dojde Donke", context: "Pure Skopje soul. The jazz-rock fusion helps him navigate the complex lies of the elite." },
+  { title: "Parni Valjak - Jesen u meni", context: "Autumn in Skopje. The heavy air, the damp concrete, and a case that refuses to close." }
+];
+
 const App: React.FC = () => {
   const [showIntro, setShowIntro] = useState(true);
-  const [gameState, setGameState] = useState<GameState>(() => {
+
+  const getInitialGameState = (): GameState => {
     const initialLevel = LEVELS[1];
     const initialUnlocked = Object.values(initialLevel.locations)
       .filter(l => l.isInitial)
@@ -106,12 +124,14 @@ const App: React.FC = () => {
       isGameOver: false,
       gameWon: null
     };
-  });
+  };
 
+  const [gameState, setGameState] = useState<GameState>(getInitialGameState);
   const [activeNPC, setActiveNPC] = useState<NPC | null>(null);
   const [currentDialogue, setCurrentDialogue] = useState<DialogueNode | null>(null);
   const [isAccusing, setIsAccusing] = useState(false);
   const [flavorText, setFlavorText] = useState<string | null>(null);
+  const [walkmanTrackIndex, setWalkmanTrackIndex] = useState(-1);
 
   const currentLevel = useMemo(() => LEVELS[gameState.currentLevelId], [gameState.currentLevelId]);
   const currentLocation = useMemo(() => currentLevel.locations[gameState.currentLocationId], [currentLevel, gameState.currentLocationId]);
@@ -132,35 +152,47 @@ const App: React.FC = () => {
     }
   }, [gameState.discoveredClues]);
 
-  const currentObjective = useMemo(() => {
-    const clues = gameState.discoveredClues;
-    if (!clues.includes('receipt')) return "Sweep the Stone Bridge for traces of the killer.";
-    if (!clues.includes('hotel_card')) return "Follow the Kafana receipt lead in Debar Maalo.";
-    if (!clues.includes('cufflink')) return "Search Room 402 at Hotel Arka.";
-    if (!clues.includes('murder_weapon')) return "Recover the weapon from the Vardar near the Galleys.";
-    if (!clues.includes('missing_statuette')) return "Confirm the murder weapon source at the Markov Residence.";
-    return "EVIDENCE READY. ARREST THE KILLER.";
-  }, [gameState.discoveredClues]);
+  const resetGame = () => {
+    setGameState(getInitialGameState());
+    setShowIntro(true);
+    setActiveNPC(null);
+    setCurrentDialogue(null);
+    setIsAccusing(false);
+    setWalkmanTrackIndex(-1);
+    setFlavorText(null);
+  };
 
   const getPartnerHint = () => {
     const clues = gameState.discoveredClues;
-    let hint = "We're spinning our wheels, partner.";
+    const loc = gameState.currentLocationId;
     
-    if (gameState.currentLocationId === 'stone_bridge' && !clues.includes('receipt')) {
-      hint = "People discard things when they're in a panic. Check the trash bins or the gaps in the stone.";
-    } else if (gameState.currentLocationId === 'debar_maalo' && !clues.includes('hotel_card')) {
-      hint = "Waiters see everything. Lazo knows which pocket Stojanov kept his secrets in.";
-    } else if (gameState.currentLocationId === 'hotel_arka' && !clues.includes('cufflink')) {
-      hint = "If there was a struggle, something fell. Check the floor, under the bed. The small stuff.";
-    } else if (gameState.currentLocationId === 'vardar_galleys' && !clues.includes('murder_weapon')) {
-      hint = "Water carries things, but the branches catch them. Look where the river slows down.";
-    } else {
-      hint = "We have what we need. Let's head back to the precinct and file the warrant.";
+    if (loc === 'stone_bridge' && !clues.includes('receipt')) {
+      return "There's a receipt near the trash bin, partner. Use the 'SEARCH AREA' button and look closely.";
+    }
+    if (loc === 'debar_maalo' && !clues.includes('hotel_card')) {
+      return "Lazo knows something, but he also hides things behind the bar. 'SEARCH AREA' near the menus.";
+    }
+    if (loc === 'hotel_arka' && (!clues.includes('cufflink') || !clues.includes('blackmail_docs'))) {
+      return "Luxury hotels hide ugly secrets. Check the safe and 'SEARCH AREA' under the furniture.";
+    }
+    if (loc === 'vardar_galleys' && !clues.includes('murder_weapon')) {
+      return "The river snagged the weapon. Look into the low branches and 'SEARCH AREA' near the shore.";
+    }
+    if (loc === 'markov_residence' && !clues.includes('missing_statuette')) {
+      return "Walk through the hallways. If that ceremonial trowel is missing from its case, we have our link. 'SEARCH AREA'.";
     }
 
-    if (gameState.migraineLevel > 80) hint = `...ugh... ${hint.toLowerCase()} ...head's exploding...`;
-    return hint;
+    if (!clues.includes('receipt')) return "We need to go back to the Stone Bridge. We missed something on the pavement.";
+    if (!clues.includes('hotel_card')) return "Head to Debar Maalo. The receipt mentioned Trend.";
+    if (!clues.includes('cufflink')) return "Arka. Room 402. That's where the trail goes cold unless you find something.";
+    if (!clues.includes('murder_weapon')) return "Check the Galleys. The current flows that way from the bridge.";
+    if (!clues.includes('missing_statuette')) return "The Markovs are hiding the source of that weapon. Head to their estate.";
+    if (!clues.includes('blackmail_docs')) return "We need Stojanov's leverage from the Hotel Arka safe to establish a solid motive.";
+
+    return "We have everything. Motive, means, and opportunity. Let's head to the Station and file the arrest warrant.";
   };
+
+  const currentStatus = useMemo(() => getPartnerHint(), [gameState.discoveredClues, gameState.currentLocationId]);
 
   const handleSearch = () => {
     const locSearches = currentLocation.searches;
@@ -168,14 +200,16 @@ const App: React.FC = () => {
     
     if (undiscovered.length > 0) {
       const result = undiscovered[0];
+      const migraineDelta = result.clueId === 'migraine_relief' ? -50 : 4;
+      
       setGameState(prev => ({
         ...prev,
         discoveredClues: [...prev.discoveredClues, result.clueId!],
-        migraineLevel: Math.min(100, prev.migraineLevel + 4)
+        migraineLevel: Math.max(0, Math.min(100, prev.migraineLevel + migraineDelta))
       }));
       setFlavorText(result.description);
     } else {
-      setFlavorText("Area sweep complete. No new evidence found.");
+      setFlavorText("Area sweep complete. No new evidence found in this sector.");
     }
     setTimeout(() => setFlavorText(null), 4000);
   };
@@ -199,7 +233,7 @@ const App: React.FC = () => {
 
     let nextNode = activeNPC.dialogue[nextId];
     if (nextId === 'v_help') {
-      nextNode = { ...nextNode, text: getPartnerHint() };
+      nextNode = { ...nextNode, text: currentStatus };
       setGameState(prev => ({ ...prev, migraineLevel: Math.min(100, prev.migraineLevel + 8) }));
     }
 
@@ -216,6 +250,14 @@ const App: React.FC = () => {
     setIsAccusing(false);
   };
 
+  const toggleWalkman = () => {
+    const nextIndex = (walkmanTrackIndex + 1) % WALKMAN_TRACKS.length;
+    setWalkmanTrackIndex(nextIndex);
+    const track = WALKMAN_TRACKS[nextIndex];
+    setFlavorText(`📻 WALKMAN: ${track.title} — ${track.context}`);
+    setTimeout(() => setFlavorText(null), 6000);
+  };
+
   if (showIntro) return <IntroScreen onStart={() => setShowIntro(false)} />;
 
   if (gameState.isGameOver) {
@@ -228,10 +270,10 @@ const App: React.FC = () => {
           <div className="h-0.5 bg-zinc-800 w-full" />
           <p className="text-zinc-400 text-sm leading-relaxed">
             {gameState.gameWon 
-              ? `Marija Markova was arrested at her estate. The brass statuette was confirmed as the murder weapon. Viktor looks at the city lights and, for the first time, he doesn't wince. 'Nice work, partner. Let's grab a coffee. On me.'`
+              ? `Marija Markova was arrested at her estate. The silver trowel was confirmed as the murder weapon. Viktor looks at the city lights and, for the first time, he doesn't wince. 'Nice work, partner. Let's grab a coffee. On me.'`
               : "The warrant was rejected for lack of evidence. The Markovs have already left for their villa in Greece. Viktor handed in his badge this morning. Skopje remains silent."}
           </p>
-          <Button onClick={() => window.location.reload()} variant="primary">REOPEN DOSSIER</Button>
+          <Button onClick={resetGame} variant="primary">REOPEN DOSSIER</Button>
         </div>
       </div>
     );
@@ -239,11 +281,11 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen max-w-4xl mx-auto flex flex-col border-x border-zinc-800 bg-[#0a0a0a] shadow-2xl relative grainy">
-      <DossierHeader level={currentLevel} objective={currentObjective} migraine={gameState.migraineLevel} />
+      <DossierHeader level={currentLevel} status={currentStatus} migraine={gameState.migraineLevel} />
 
       <main className="flex-1 overflow-y-auto p-4 md:p-8 space-y-8 pb-32">
         {flavorText && (
-          <div className="fixed top-24 left-1/2 -translate-x-1/2 w-[90%] md:w-auto bg-amber-950 text-amber-500 p-3 border border-amber-600 font-mono text-xs z-[60] animate-pulse text-center shadow-xl uppercase">
+          <div className="fixed top-24 left-1/2 -translate-x-1/2 w-[90%] md:w-auto bg-amber-950 text-amber-100 p-4 border-2 border-amber-600 font-mono text-xs z-[60] animate-in fade-in slide-in-from-top-2 duration-300 shadow-2xl uppercase">
             {flavorText}
           </div>
         )}
@@ -309,7 +351,11 @@ const App: React.FC = () => {
                     key={locId} 
                     variant={gameState.currentLocationId === locId ? 'success' : 'ghost'}
                     className="text-[9px] py-3"
-                    onClick={() => setGameState(prev => ({ ...prev, currentLocationId: locId, migraineLevel: Math.min(100, prev.migraineLevel + 1) }))}
+                    onClick={() => {
+                      setGameState(prev => ({ ...prev, currentLocationId: locId, migraineLevel: Math.min(100, prev.migraineLevel + 1) }));
+                      setActiveNPC(null); 
+                      setCurrentDialogue(null);
+                    }}
                   >
                     {currentLevel.locations[locId].name}
                   </Button>
@@ -343,7 +389,13 @@ const App: React.FC = () => {
 
       <footer className="p-4 border-t border-zinc-800 bg-zinc-900/90 backdrop-blur-md sticky bottom-0 z-50 flex justify-between items-center">
         <div className="flex gap-4">
-          <Button variant="ghost" className="text-[9px]" onClick={() => window.alert("Walkman: Viktor's cassette tape is playing 'Bijelo Dugme'. It helps him think through the pain.")}>PLAY WALKMAN</Button>
+          <Button 
+            variant="ghost" 
+            className="text-[9px] text-amber-500/80" 
+            onClick={toggleWalkman}
+          >
+            <span>📻</span> WALKMAN
+          </Button>
         </div>
         
         {gameState.currentLocationId === 'police_station' && !activeNPC && (

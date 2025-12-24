@@ -5,7 +5,7 @@ export const LEVELS: Record<number, Level> = {
   1: {
     id: 1,
     title: "Water Under the Bridge",
-    caseFile: "VICTIM: Petar Stojanov (44). FOUND: Stone Bridge @ 03:00. CAUSE: Blunt Force Trauma. NOTES: Victim was a top city developer. No wallet found. Signs of struggle.",
+    caseFile: "VICTIM: Petar Stojanov (44). FOUND: Stone Bridge @ 03:00. CAUSE: Blunt Force Trauma / Laceration. NOTES: Victim was a top city developer. No wallet found. Signs of struggle.",
     locations: {
       "police_station": {
         id: "police_station",
@@ -53,7 +53,7 @@ export const LEVELS: Record<number, Level> = {
         description: "The wooden tourist ships look like ghosts in the dark. The river current is strong here, swirling around the piles of the bridge.",
         npcs: [],
         searches: [
-          { id: "s7", description: "Caught in the low-hanging branches of a willow tree near the galley, you spot something metallic. It's a heavy brass statuette—covered in dried blood.", clueId: "murder_weapon" }
+          { id: "s7", description: "Caught in the low-hanging branches of a willow tree near the galley, you spot something silver and sharp. It's a heavy commemorative trowel—etched with the victim's name and stained with blood.", clueId: "murder_weapon" }
         ]
       },
       "markov_residence": {
@@ -62,7 +62,7 @@ export const LEVELS: Record<number, Level> = {
         description: "A fortress of glass and marble in Vodno. The home of Goran Markov and his wife, Marija. Money can't hide the tension in the air here.",
         npcs: ["markov", "marija"],
         searches: [
-          { id: "s8", description: "In the hallway, you see a collection of brass statuettes. One is missing from its pedestal.", clueId: "missing_statuette" }
+          { id: "s8", description: "In the study hallway, there is an open velvet-lined case labeled 'Grand Opening: Skopje East Plaza'. The silver trowel meant for the case is missing.", clueId: "missing_statuette" }
         ]
       }
     },
@@ -109,7 +109,7 @@ export const LEVELS: Record<number, Level> = {
           "s_start": {
             id: "s_start",
             speaker: "Sandra",
-            text: "Stojanov didn't just fall. He was struck. Hard. Something with weight and an edge. Like a heavy award or a statuette.",
+            text: "Stojanov didn't just fall. He was struck. The wound is unusual—heavy impact but with a clean, flat cutting edge. Like a heavy ceremonial tool.",
             options: [
               { text: "Could a cufflink cause these scratches?", nextId: "s_scratch", requirement: { clueId: "cufflink" } },
               { text: "I'll let you get back to it.", nextId: "s_exit" }
@@ -137,14 +137,17 @@ export const LEVELS: Record<number, Level> = {
             text: "Stojanov? He was here with a woman. Not his wife. She looked expensive and very, very angry. They left in a hurry.",
             options: [
               { text: "Where were they headed?", nextId: "l_info" },
-              { text: "Thanks.", nextId: "l_exit" }
+              { text: "I have to go.", nextId: "l_exit" }
             ]
           },
           "l_info": {
             id: "l_info",
             speaker: "Lazo",
             text: "She mentioned 'Room 402'. I didn't catch the hotel, but she mentioned it was 'near the Bazaar'. Arka fits the bill.",
-            options: [{ text: "Arka. Got it.", nextId: "l_start" }]
+            options: [
+              { text: "That's useful. Thanks.", nextId: "l_start" },
+              { text: "See you around, Lazo.", nextId: "l_exit" }
+            ]
           },
           "l_exit": { id: "l_exit", speaker: "Lazo", text: "Watch your back, detective.", options: [] }
         }
@@ -162,6 +165,7 @@ export const LEVELS: Record<number, Level> = {
             text: "Stojanov was a parasite. But I didn't kill him. I'm a businessman, not a thug. Ask my wife if you want a character witness.",
             options: [
               { text: "Where is Marija?", nextId: "m_wife" },
+              { text: "What about the tire tracks?", nextId: "m_tires", requirement: { clueId: "tire_track" } },
               { text: "I'll be seeing you.", nextId: "m_exit" }
             ]
           },
@@ -169,7 +173,13 @@ export const LEVELS: Record<number, Level> = {
             id: "m_wife",
             speaker: "Goran",
             text: "She's upstairs. She's been... fragile since the news. They were 'close' once.",
-            options: [{ text: "Close. I see.", nextId: "m_start" }]
+            options: [{ text: "I'll go find her.", nextId: "m_start" }]
+          },
+          "m_tires": {
+            id: "m_tires",
+            speaker: "Goran",
+            text: "I have a G-Wagon. So does half of Vodno. You need more than tread depth to lock me up, detective.",
+            options: [{ text: "We'll see.", nextId: "m_start" }]
           },
           "m_exit": { id: "m_exit", speaker: "Goran", text: "Get out of my house.", options: [] }
         }
@@ -188,20 +198,43 @@ export const LEVELS: Record<number, Level> = {
             options: [
               { text: "Explain your presence at Hotel Arka.", nextId: "mr_confront", requirement: { clueId: "hotel_card" } },
               { text: "Does this cufflink look familiar?", nextId: "mr_cufflink", requirement: { clueId: "cufflink" } },
+              { text: "I found your blackmail documents.", nextId: "mr_blackmail", requirement: { clueId: "blackmail_docs" } },
+              { text: "I found the Silver Trowel in the Vardar.", nextId: "mr_weapon", requirement: { clueId: "murder_weapon" } },
               { text: "Goodbye.", nextId: "mr_exit" }
             ]
           },
           "mr_confront": {
             id: "mr_confront",
             speaker: "Marija",
-            text: "We had a history. A mistake. But Petar wanted more than just my company—he wanted Goran's empire. He threatened to expose us.",
-            options: [{ text: "Go on.", nextId: "mr_start" }]
+            text: "We had a history. A mistake. But Petar wanted more than just my company—he wanted Goran's empire. He threatened to expose us. I went there to beg him to stop.",
+            options: [{ text: "I see.", nextId: "mr_start" }]
           },
           "mr_cufflink": {
             id: "mr_cufflink",
             speaker: "Marija",
-            text: "That was his. He clutched it like a trophy. He thought he owned me. He was wrong.",
-            options: [{ text: "I have questions about a missing statuette.", nextId: "mr_start", requirement: { clueId: "missing_statuette" } }]
+            text: "A gold 'S'. Yes, he wore those every day. He was obsessed with his own name. I haven't seen that one in weeks.",
+            options: [{ text: "You're lying.", nextId: "mr_start" }]
+          },
+          "mr_blackmail": {
+            id: "mr_blackmail",
+            speaker: "Marija",
+            text: "He was forcing me to steal files. He was going to send Goran to prison and leave me with nothing. But that's not a reason to kill a man, is it?",
+            options: [
+              { text: "It is for someone with your temper.", nextId: "mr_start" },
+              { text: "The presentation case in the hall is empty.", nextId: "mr_missing", requirement: { clueId: "missing_statuette" } }
+            ]
+          },
+          "mr_missing": {
+            id: "mr_missing",
+            speaker: "Marija",
+            text: "Petar loved that trowel. He kept it in the study. He probably took it himself as some sort of sick souvenir.",
+            options: [{ text: "We found it. Covered in his blood.", nextId: "mr_start", requirement: { clueId: "murder_weapon" } }]
+          },
+          "mr_weapon": {
+            id: "mr_weapon",
+            speaker: "Marija",
+            text: "It was so heavy... and sharp. He laughed at me on that bridge. He said I was just a pawn in his development plan. I didn't plan it... I just couldn't let him build his empire on my bones.",
+            options: [{ text: "It's over, Marija.", nextId: "mr_exit" }]
           },
           "mr_exit": { id: "mr_exit", speaker: "Marija", text: "I have nothing more to say to the police.", options: [] }
         }
@@ -213,8 +246,8 @@ export const LEVELS: Record<number, Level> = {
       "hotel_card": { id: "hotel_card", name: "Hotel Arka Card", description: "Found in Debar Maalo. Mentions Room 402." },
       "cufflink": { id: "cufflink", name: "S-Cufflink", description: "Found in Hotel Arka. A match for the victim's missing one." },
       "blackmail_docs": { id: "blackmail_docs", name: "Blackmail Files", description: "Proves Stojanov was forcing Marija to spy on her husband." },
-      "murder_weapon": { id: "murder_weapon", name: "Brass Statuette", description: "The murder weapon. Found in the Vardar. It matches the set at the Markov estate." },
-      "missing_statuette": { id: "missing_statuette", name: "Empty Pedestal", description: "A missing piece from a collection at the Markov house." },
+      "murder_weapon": { id: "murder_weapon", name: "Silver Trowel", description: "The murder weapon. A heavy construction tool etched with the victim's name. Found in the Vardar." },
+      "missing_statuette": { id: "missing_statuette", name: "Empty Display Case", description: "The presentation case for the silver trowel is empty at the Markov house." },
       "migraine_relief": { id: "migraine_relief", name: "Painkillers", description: "Viktor's meds. Essential for keeping him focused." }
     },
     solution: {
