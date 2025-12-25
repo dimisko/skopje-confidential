@@ -151,7 +151,6 @@ const App: React.FC = () => {
   const currentLevel = useMemo(() => LEVELS[gameState.currentLevelId], [gameState.currentLevelId]);
   const currentLocation = useMemo(() => currentLevel.locations[gameState.currentLocationId], [currentLevel, gameState.currentLocationId]);
 
-  // Handle external clue discovery events (e.g., from dialogue)
   useEffect(() => {
     const handleDiscoverClue = (e: any) => {
       const clueId = e.detail;
@@ -245,7 +244,6 @@ const App: React.FC = () => {
       setGameState(prev => ({ ...prev, discoveredSuspects: [...prev.discoveredSuspects, npcId] }));
     }
     
-    // Viktor won't talk if his migraine is at 100%
     if (npcId === 'viktor' && gameState.migraineLevel >= 100) {
       setCurrentDialogue({
         id: "v_incapacitated",
@@ -353,21 +351,11 @@ const App: React.FC = () => {
               <p className="text-zinc-300 italic leading-relaxed font-serif text-sm sm:text-lg">"{currentDialogue.text}"</p>
             </div>
             <div className="grid grid-cols-1 gap-2">
-              {availableDialogueOptions.map((opt, i) => {
-                const handleSelection = () => {
-                   handleDialogueOption(opt.nextId, opt.onSelect);
-                };
-
-                return (
-                  <Button 
-                    key={i} 
-                    onClick={handleSelection}
-                    className="text-left justify-start"
-                  >
-                    {opt.text}
-                  </Button>
-                );
-              })}
+              {availableDialogueOptions.map((opt, i) => (
+                <Button key={i} onClick={() => handleDialogueOption(opt.nextId, opt.onSelect)} className="text-left justify-start">
+                  {opt.text}
+                </Button>
+              ))}
               {availableDialogueOptions.length === 0 && (
                 <Button variant="success" onClick={() => { setActiveNPC(null); setCurrentDialogue(null); }}>END CONVERSATION</Button>
               )}
@@ -392,11 +380,7 @@ const App: React.FC = () => {
               </Button>
               {currentLocation.npcs.map(nId => {
                 const npc = currentLevel.npcs[nId];
-                let label = "";
-                if (nId === 'viktor') label = "TALK TO VIKTOR";
-                else if (nId === 'sandra') label = "TALK TO DR. KOVAC";
-                else label = `INTERROGATE ${npc.name.split(' ')[0]}`;
-                
+                let label = nId === 'viktor' ? "TALK TO VIKTOR" : nId === 'sandra' ? "TALK TO DR. KOVAC" : `INTERROGATE ${npc.name.split(' ')[0]}`;
                 return (
                   <Button key={nId} onClick={() => startDialogue(nId)} variant="dossier" className="flex-1 py-4 text-xs font-bold border-2">
                     {label}

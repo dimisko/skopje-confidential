@@ -1,5 +1,5 @@
 
-export const GAME_VERSION = "1.0.2";
+export const GAME_VERSION = "1.1.0";
 
 export interface DialogueOption {
   text: string;
