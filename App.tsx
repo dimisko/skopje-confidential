@@ -42,7 +42,7 @@ const DossierHeader: React.FC<{ level: Level; migraine: number }> = ({ level, mi
         </div>
         
         <div className="shrink-0 flex flex-col items-end">
-          <p className="text-[7px] sm:text-[8px] font-bold uppercase tracking-widest text-zinc-600 mb-0.5 whitespace-nowrap">MIGRAINE</p>
+          <p className="text-[7px] sm:text-[8px] font-bold uppercase tracking-widest text-zinc-600 mb-0.5 whitespace-nowrap">VIKTOR’S MIGRAINE</p>
           <div className="w-16 sm:w-24 h-1.5 sm:h-2 bg-black/10 border border-black/20 overflow-hidden">
             <div 
               className={`h-full transition-all duration-1000 ${migraine > 75 ? 'bg-red-700' : 'bg-amber-800'}`} 
@@ -244,7 +244,18 @@ const App: React.FC = () => {
     if (!gameState.discoveredSuspects.includes(npcId)) {
       setGameState(prev => ({ ...prev, discoveredSuspects: [...prev.discoveredSuspects, npcId] }));
     }
-    setCurrentDialogue(npc.dialogue[npc.initialNode]);
+    
+    // Viktor won't talk if his migraine is at 100%
+    if (npcId === 'viktor' && gameState.migraineLevel >= 100) {
+      setCurrentDialogue({
+        id: "v_incapacitated",
+        speaker: "Viktor",
+        text: "Viktor is clutching his head, his eyes squeezed shut. He looks at you for a split second, winces, and looks away. The pressure in his skull is too great; he cannot even focus on your words.",
+        options: []
+      });
+    } else {
+      setCurrentDialogue(npc.dialogue[npc.initialNode]);
+    }
   };
 
   const handleDialogueOption = (nextId: string, onSelect?: () => void) => {
