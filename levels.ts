@@ -210,8 +210,8 @@ export const LEVELS: Record<number, Level> = {
               { text: "Explain your presence at Hotel Arka.", nextId: "mr_confront", requirement: { clueId: "hotel_card" } },
               { text: "Does this cufflink look familiar?", nextId: "mr_cufflink", requirement: { clueId: "cufflink" } },
               { text: "I found your blackmail documents.", nextId: "mr_blackmail", requirement: { clueId: "blackmail_docs" } },
-              { text: "We found the murder weapon. Admit it.", nextId: "mr_weapon", requirement: { clueId: "fingerprints" } },
               { text: "I found the silver trowel in the river.", nextId: "mr_weapon_deny", requirement: { clueId: "murder_weapon" } },
+              { text: "We found the murder weapon. Admit it.", nextId: "mr_weapon", requirement: { clueId: "fingerprints" } },
               { text: "Goodbye.", nextId: "mr_exit" }
             ]
           },
